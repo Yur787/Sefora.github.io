@@ -1,751 +1,496 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Grand Line Archive</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
-    <style>
-        /* ============================================
-           RESET & ROOT VARIABLES
-           ============================================ */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --bg: #0a0a0f;
-            --surface: #111118;
-            --border: #2a2a3a;
-            --accent: #c8922a;
-            --text: #e8e0d0;
-            --muted: #7a7590;
-            --card-bg: #16161f;
-            --card-hover: #1e1e2a;
-            --overlay: rgba(0,0,0,0.88);
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Crimson Pro', Georgia, serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' result='noise'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%230a0a0f' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* ============================================
-           HEADER
-           ============================================ */
-        header {
-            position: relative;
-            padding: 32px 48px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: linear-gradient(180deg, #0d0d15 0%, transparent 100%);
-            z-index: 10;
-        }
-
-        .hx {
-            width: 46px;
-            height: 46px;
-            background: var(--accent);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        header h1 {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: clamp(14px, 2.2vw, 22px);
-            font-weight: 900;
-            color: var(--accent);
-            letter-spacing: 0.05em;
-            text-shadow: 0 0 40px rgba(200, 146, 42, 0.3);
-        }
-
-        header p {
-            font-size: 11px;
-            color: var(--muted);
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-
-        /* ============================================
-           LAYOUT
-           ============================================ */
-        .layout {
-            display: flex;
-            min-height: calc(100vh - 107px);
-            position: relative;
-            z-index: 1;
-        }
-
-        aside {
-            width: 224px;
-            flex-shrink: 0;
-            border-right: 1px solid var(--border);
-            padding: 18px 0 40px;
-            position: sticky;
-            top: 0;
-            height: calc(100vh - 107px);
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
-        }
-
-        aside::-webkit-scrollbar { width: 3px; }
-        aside::-webkit-scrollbar-thumb { background: var(--border); }
-
-        .sc {
-            font-size: 9px;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: var(--accent);
-            padding: 18px 18px 7px;
-            font-weight: 700;
-        }
-
-        .sc:first-child { padding-top: 8px; }
-
-        .nd {
-            height: 1px;
-            background: var(--border);
-            margin: 12px 18px;
-        }
-
-        .ni {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            padding: 8px 18px;
-            cursor: pointer;
-            transition: all 0.16s;
-            border-left: 3px solid transparent;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--muted);
-            user-select: none;
-        }
-
-        .ni:hover { color: var(--text); background: rgba(255, 255, 255, 0.03); }
-        .ni.active { color: var(--accent); border-left-color: var(--accent); background: rgba(200, 146, 42, 0.06); }
-
-        .ic { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
-
-        main {
-            flex: 1;
-            padding: 32px 44px;
-            overflow-y: auto;
-        }
-
-        .section { display: none; }
-        .section.active { display: block; }
-
-        .sh {
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .st { font-family: 'Cinzel Decorative', serif; font-size: 18px; color: var(--accent); }
-        .sc2 { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
-        .sd { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.65; }
-
-        /* ============================================
-           GRID & CARDS
-           ============================================ */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .grid2 { grid-template-columns: repeat(2, 1fr); }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.2s;
-            overflow: hidden;
-        }
-
-        .card:hover {
-            border-color: var(--accent);
-            background: var(--card-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(200, 146, 42, 0.12);
-        }
-
-        .ci {
-            width: 100%;
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            background: linear-gradient(135deg, #1a1a25 0%, #0f0f18 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ci2 { aspect-ratio: 2/1 !important; font-size: 34px !important; }
-
-        .ci::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 50% 30%, rgba(200, 146, 42, 0.08) 0%, transparent 70%);
-        }
-
-        .rb {
-            position: absolute;
-            top: 7px;
-            right: 7px;
-            background: rgba(0, 0, 0, 0.75);
-            border: 1px solid var(--accent);
-            border-radius: 2px;
-            padding: 2px 6px;
-            font-size: 9px;
-            font-weight: 700;
-            color: var(--accent);
-            z-index: 2;
-        }
-
-        .cb { padding: 11px 13px; border-top: 1px solid var(--border); }
-        .cn { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-        .cs { font-size: 10px; color: var(--muted); }
-
-        .ct { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
-        .tag {
-            display: inline-block;
-            padding: 1px 6px;
-            border-radius: 2px;
-            font-size: 8px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        /* Tag Colors */
-        .tl { background: rgba(74, 158, 255, 0.15); color: #4a9eff; border: 1px solid rgba(74, 158, 255, 0.28); }
-        .tz { background: rgba(80, 200, 120, 0.15); color: #50c878; border: 1px solid rgba(80, 200, 120, 0.28); }
-        .tp { background: rgba(200, 80, 255, 0.15); color: #c850ff; border: 1px solid rgba(200, 80, 255, 0.28); }
-        .ta { background: rgba(200, 146, 42, 0.15); color: #c8922a; border: 1px solid rgba(200, 146, 42, 0.28); }
-        .to { background: rgba(255, 220, 80, 0.15); color: #ffdc50; border: 1px solid rgba(255, 220, 80, 0.28); }
-        .tk { background: rgba(220, 60, 60, 0.15); color: #dc3c3c; border: 1px solid rgba(220, 60, 60, 0.28); }
-
-        /* ============================================
-           MODAL STYLES
-           ============================================ */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--overlay);
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(8px);
-        }
-
-        .modal-overlay.open { display: flex; }
-
-        .modal {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            width: 100%;
-            max-width: 560px;
-            max-height: 82vh;
-            overflow-y: auto;
-            position: relative;
-            animation: mIn 0.18s ease;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-
-        @keyframes mIn {
-            from { opacity: 0; transform: scale(0.95) translateY(8px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .mh {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 22px 22px 16px;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: var(--surface);
-            z-index: 2;
-        }
-
-        .me { font-size: 40px; flex-shrink: 0; }
-        .mt { font-family: 'Cinzel Decorative', serif; font-size: 15px; color: var(--accent); line-height: 1.3; }
-        .ms { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-        .mc {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 15px;
-            width: 28px;
-            height: 28px;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .mc:hover { border-color: var(--accent); color: var(--accent); }
-
-        /* Modal Image */
-        .mi {
-            width: 100%;
-            max-height: 250px;
-            object-fit: cover;
-            border-radius: 3px;
-            margin: 0;
-            display: none;
-        }
-
-        .mi.show { display: block; }
-
-        .mb { padding: 20px 22px 24px; }
-
-        /* ============================================
-           DETAIL SECTIONS (NEW - Expandable tabs)
-           ============================================ */
-        .detail-tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto;
-            padding-bottom: 0;
-        }
-
-        .detail-tab {
-            padding: 8px 14px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            border-bottom: none;
-            border-radius: 3px 3px 0 0;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .detail-tab:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-        }
-
-        .detail-tab.active {
-            background: var(--accent);
-            color: var(--bg);
-            border-color: var(--accent);
-        }
-
-        .detail-content {
-            display: none;
-            animation: fadeIn 0.15s ease;
-        }
-
-        .detail-content.show { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .msec { margin-bottom: 16px; }
-        .msec-t {
-            font-size: 9px;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-
-        .msec p {
-            font-size: 13px;
-            line-height: 1.78;
-            color: var(--text);
-        }
-
-        .msec ul {
-            font-size: 13px;
-            line-height: 1.78;
-            color: var(--text);
-            margin-left: 20px;
-        }
-
-        .msec li {
-            margin-bottom: 8px;
-        }
-
-        /* ============================================
-           STAT ROWS
-           ============================================ */
-        .sr {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 12px;
-        }
-
-        .sl { color: var(--muted); flex-shrink: 0; min-width: 100px; }
-        .sv { color: var(--text); font-weight: 600; text-align: right; }
-
-        /* Roll Chance Bar */
-        .rc { margin-top: 4px; }
-        .rh {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .rl { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
-        .rp { font-size: 13px; font-weight: 700; color: var(--accent); }
-        .rt { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-        .rf { height: 100%; background: linear-gradient(90deg, #c8922a, #ffdc50); border-radius: 3px; }
-        .rn { font-size: 10px; color: var(--muted); margin-top: 4px; font-style: italic; }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Grand Line Archive</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a0f; --surface: #111118; --border: #2a2a3a;
+  --accent: #c8922a; --text: #e8e0d0; --muted: #7a7590;
+  --card-bg: #16161f; --card-hover: #1e1e2a; --overlay: rgba(0,0,0,0.88);
+}
+body { background:var(--bg); color:var(--text); font-family:'Crimson Pro',Georgia,serif; min-height:100vh; overflow-x:hidden; }
+body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; }
+header { position:relative; padding:32px 48px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; background:linear-gradient(180deg,#0d0d15 0%,transparent 100%); z-index:1; }
+.hx { width:46px; height:46px; background:var(--accent); clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+header h1 { font-family:'Cinzel Decorative',serif; font-size:clamp(14px,2.2vw,22px); font-weight:900; color:var(--accent); letter-spacing:0.05em; text-shadow:0 0 40px rgba(200,146,42,0.3); }
+header p { font-size:11px; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; margin-top:2px; }
+.layout { display:flex; min-height:calc(100vh - 107px); position:relative; z-index:1; }
+aside { width:224px; flex-shrink:0; border-right:1px solid var(--border); padding:18px 0 40px; position:sticky; top:0; height:calc(100vh - 107px); overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+aside::-webkit-scrollbar { width:3px; } aside::-webkit-scrollbar-thumb { background:var(--border); }
+.sc { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); padding:18px 18px 7px; font-weight:700; }
+.sc:first-child { padding-top:8px; }
+.nd { height:1px; background:var(--border); margin:12px 18px; }
+.ni { display:flex; align-items:center; gap:9px; padding:8px 18px; cursor:pointer; transition:all 0.16s; border-left:3px solid transparent; font-size:13px; font-weight:600; color:var(--muted); user-select:none; }
+.ni:hover { color:var(--text); background:rgba(255,255,255,0.03); }
+.ni.active { color:var(--accent); border-left-color:var(--accent); background:rgba(200,146,42,0.06); }
+.ic { font-size:14px; width:18px; text-align:center; flex-shrink:0; }
+main { flex:1; padding:32px 44px; overflow-y:auto; }
+.section { display:none; } .section.active { display:block; }
+.sh { display:flex; align-items:baseline; gap:12px; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+.st { font-family:'Cinzel Decorative',serif; font-size:18px; color:var(--accent); }
+.sc2 { font-size:10px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; }
+.sd { font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.65; }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.grid2 { grid-template-columns:repeat(2,1fr); }
+.card { background:var(--card-bg); border:1px solid var(--border); border-radius:3px; cursor:pointer; transition:all 0.2s; overflow:hidden; }
+.card:hover { border-color:var(--accent); background:var(--card-hover); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 0 1px rgba(200,146,42,0.12); }
+.ci { width:100%; aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:48px; background:linear-gradient(135deg,#1a1a25 0%,#0f0f18 100%); position:relative; overflow:hidden; }
+.ci2 { aspect-ratio:2/1 !important; font-size:34px !important; }
+.ci::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 30%,rgba(200,146,42,0.08) 0%,transparent 70%); }
+.rb { position:absolute; top:7px; right:7px; background:rgba(0,0,0,0.75); border:1px solid var(--accent); border-radius:2px; padding:2px 6px; font-size:9px; font-weight:700; color:var(--accent); z-index:2; letter-spacing:0.04em; }
+.cb { padding:11px 13px; border-top:1px solid var(--border); }
+.cn { font-size:12px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.cs { font-size:10px; color:var(--muted); }
+.ct { display:flex; flex-wrap:wrap; gap:3px; margin-top:6px; }
+.tag { display:inline-block; padding:1px 6px; border-radius:2px; font-size:8px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700; }
+.tl  { background:rgba(74,158,255,0.15);  color:#4a9eff;  border:1px solid rgba(74,158,255,0.28); }
+.tz  { background:rgba(80,200,120,0.15);  color:#50c878;  border:1px solid rgba(80,200,120,0.28); }
+.tp  { background:rgba(200,80,255,0.15);  color:#c850ff;  border:1px solid rgba(200,80,255,0.28); }
+.ta  { background:rgba(200,146,42,0.15);  color:#c8922a;  border:1px solid rgba(200,146,42,0.28); }
+.to  { background:rgba(255,220,80,0.15);  color:#ffdc50;  border:1px solid rgba(255,220,80,0.28); }
+.tk  { background:rgba(220,60,60,0.15);   color:#dc3c3c;  border:1px solid rgba(220,60,60,0.28); }
+.ts  { background:rgba(160,160,200,0.15); color:#a0a0c8;  border:1px solid rgba(160,160,200,0.28); }
+.tm  { background:rgba(100,200,180,0.15); color:#64c8b4;  border:1px solid rgba(100,200,180,0.28); }
+.tc  { background:rgba(140,140,140,0.1);  color:#a0a0a0;  border:1px solid rgba(140,140,140,0.22); }
+.tu  { background:rgba(80,180,80,0.14);   color:#70d870;  border:1px solid rgba(80,180,80,0.28); }
+.tleg{ background:rgba(255,165,0,0.14);   color:#ffa500;  border:1px solid rgba(255,165,0,0.28); }
+.tmy { background:rgba(180,0,255,0.14);   color:#b400ff;  border:1px solid rgba(180,0,255,0.28); }
+.tboss{ background:rgba(220,40,40,0.14);  color:#e04040;  border:1px solid rgba(220,40,40,0.28); }
+.tsys{ background:rgba(60,160,220,0.14);  color:#3ca0dc;  border:1px solid rgba(60,160,220,0.28); }
+.tr  { background:rgba(255,180,60,0.14);  color:#ffb43c;  border:1px solid rgba(255,180,60,0.28); }
+.ttr { background:rgba(100,255,180,0.1);  color:#64ffb4;  border:1px solid rgba(100,255,180,0.22); }
+.modal-overlay { position:fixed; inset:0; background:var(--overlay); z-index:100; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(8px); }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:5px; width:100%; max-width:560px; max-height:82vh; overflow-y:auto; position:relative; animation:mIn 0.18s ease; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+@keyframes mIn { from{opacity:0;transform:scale(0.95) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.mh { display:flex; align-items:center; gap:16px; padding:22px 22px 16px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); z-index:1; }
+.me { font-size:40px; flex-shrink:0; }
+.mt { font-family:'Cinzel Decorative',serif; font-size:15px; color:var(--accent); line-height:1.3; }
+.ms { font-size:11px; color:var(--muted); margin-top:2px; }
+.mc { position:absolute; top:16px; right:16px; background:none; border:1px solid var(--border); color:var(--muted); font-size:15px; width:28px; height:28px; border-radius:3px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; }
+.mc:hover { border-color:var(--accent); color:var(--accent); }
+.mb { padding:20px 22px 24px; }
+.msec { margin-bottom:16px; }
+.msec-t { font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.msec p { font-size:13px; line-height:1.78; color:var(--text); }
+.sr { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px; }
+.sl { color:var(--muted); flex-shrink:0; min-width:100px; }
+.sv { color:var(--text); font-weight:600; text-align:right; }
+.rc { margin-top:4px; }
+.rh { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.rl { font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); }
+.rp { font-size:13px; font-weight:700; color:var(--accent); }
+.rt { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.rf { height:100%; background:linear-gradient(90deg,#c8922a,#ffdc50); border-radius:3px; }
+.rn { font-size:10px; color:var(--muted); margin-top:4px; font-style:italic; }
+.sst { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin:22px 0 10px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+.pt { width:100%; border-collapse:collapse; font-size:12px; margin-top:6px; }
+.pt th { text-align:left; padding:7px 9px; font-size:8px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); font-weight:600; }
+.pt td { padding:7px 9px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text); vertical-align:top; }
+.pt tr:last-child td { border-bottom:none; }
+.pt td:first-child { color:var(--accent); font-weight:700; }
+</style>
 </head>
 <body>
 <header>
-    <div class="hx">☠</div>
-    <div>
-        <h1>Grand Line Archive</h1>
-        <p>One Piece Encyclopedia — Powers, Systems &amp; Lore</p>
-    </div>
+  <div class="hx">☠</div>
+  <div>
+    <h1>Grand Line Archive</h1>
+    <p>One Piece Encyclopedia — Powers, Systems &amp; Lore</p>
+  </div>
 </header>
-
 <div class="layout">
 <aside>
-    <div class="sc">⚔ Combat Arts</div>
-    <div class="ni active" onclick="sw('martial',this)"><span class="ic">👊</span>Martial Arts</div>
-    <div class="nd"></div>
+  <div class="sc">⚔ Combat Arts</div>
+  <div class="ni active" onclick="sw('swords',this)"><span class="ic">🗡️</span>Swordsmanship</div>
+  <div class="ni" onclick="sw('fruits',this)"><span class="ic">🍎</span>Devil Fruits</div>
+  <div class="ni" onclick="sw('martial',this)"><span class="ic">👊</span>Martial Arts</div>
+  <div class="ni" onclick="sw('movesets',this)"><span class="ic">💥</span>New Movesets</div>
+  <div class="nd"></div>
+  <div class="sc">⚡ Haki</div>
+  <div class="ni" onclick="sw('armament',this)"><span class="ic">🖤</span>Armament</div>
+  <div class="ni" onclick="sw('observation',this)"><span class="ic">👁️</span>Observation</div>
+  <div class="ni" onclick="sw('conqueror',this)"><span class="ic">👑</span>Conqueror</div>
+  <div class="nd"></div>
+  <div class="sc">⚙ Systems</div>
+  <div class="ni" onclick="sw('bounty',this)"><span class="ic">💰</span>Bounty System</div>
+  <div class="ni" onclick="sw('crew',this)"><span class="ic">🏴‍☠️</span>Crew System</div>
+  <div class="ni" onclick="sw('marine',this)"><span class="ic">⚓</span>Marine System</div>
+  <div class="ni" onclick="sw('progression',this)"><span class="ic">📈</span>Progression</div>
+  <div class="ni" onclick="sw('sworddrops',this)"><span class="ic">🔱</span>Graded Sword Drops</div>
+  <div class="ni" onclick="sw('traits',this)"><span class="ic">🧬</span>Traits</div>
+  <div class="nd"></div>
+  <div class="sc">🌐 Origins</div>
+  <div class="ni" onclick="sw('races',this)"><span class="ic">🌍</span>Races</div>
+  <div class="ni" onclick="sw('backstory',this)"><span class="ic">📜</span>Backstory &amp; Trait Roll</div>
 </aside>
-
 <main>
-<!-- MARTIAL ARTS SECTION (Example with Rokushiki) -->
-<div class="section active" id="section-martial">
-    <div class="sh"><span class="st">Martial Arts</span><span class="sc2">5 entries</span></div>
-    <p class="sd">Hand-to-hand and weapon-based disciplines. Click any to see detailed abilities and passives.</p>
-    <div class="grid">
-        <div class="card" onclick="om('rokushiki')">
-            <div class="ci"><span class="rb">4%</span>🌀</div>
-            <div class="cb">
-                <div class="cn">Rokushiki</div>
-                <div class="cs">Six Powers</div>
-                <div class="ct"><span class="tag tsys">WG</span></div>
-            </div>
-        </div>
-        <div class="card" onclick="om('blackleg')">
-            <div class="ci"><span class="rb">9%</span>🦵</div>
-            <div class="cb">
-                <div class="cn">Black Leg Style</div>
-                <div class="cs">Sanji</div>
-                <div class="ct"><span class="tag to">Rare</span></div>
-            </div>
-        </div>
-        <div class="card" onclick="om('fishman_karate')">
-            <div class="ci"><span class="rb">7%</span>🌊</div>
-            <div class="cb">
-                <div class="cn">Fish-Man Karate</div>
-                <div class="cs">Jinbe</div>
-                <div class="ct"><span class="tag tl">Ethnic</span></div>
-            </div>
-        </div>
-    </div>
+
+<!-- SWORDSMANSHIP -->
+<div class="section active" id="section-swords">
+  <div class="sh"><span class="st">Swordsmanship</span><span class="sc2">6 entries</span></div>
+  <p class="sd">Blade arts and fighting styles. Each style defines the swordsman's identity and power ceiling.</p>
+  <div class="grid">
+    <div class="card" onclick="om('santoryu')"><div class="ci"><span class="rb">8%</span>⚔️</div><div class="cb"><div class="cn">Santoryu</div><div class="cs">Roronoa Zoro</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ts">3-Sword</span></div></div></div>
+    <div class="card" onclick="om('nitoryu')"><div class="ci"><span class="rb">18%</span>⚔️</div><div class="cb"><div class="cn">Nitoryu</div><div class="cs">Two-Sword Style</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag ts">2-Sword</span></div></div></div>
+    <div class="card" onclick="om('ittoryu')"><div class="ci"><span class="rb">30%</span>🗡️</div><div class="cb"><div class="cn">Ittoryu</div><div class="cs">One-Sword Style</div><div class="ct"><span class="tag tc">Common</span><span class="tag ts">1-Sword</span></div></div></div>
+    <div class="card" onclick="om('kyutoryu')"><div class="ci"><span class="rb">2%</span>🌀</div><div class="cb"><div class="cn">Kyutoryu — Asura</div><div class="cs">Nine-Sword Illusion</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag ts">9-Sword</span></div></div></div>
+    <div class="card" onclick="om('supreme_blade')"><div class="ci"><span class="rb">1%</span>🌙</div><div class="cb"><div class="cn">Supreme Blade Path</div><div class="cs">World's Finest</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag ts">Supreme</span></div></div></div>
+    <div class="card" onclick="om('shura')"><div class="ci"><span class="rb">5%</span>🪦</div><div class="cb"><div class="cn">Shura — Dead Man's Draw</div><div class="cs">Ryuma's Quick-Draw</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ts">Draw Style</span></div></div></div>
+  </div>
+</div>
+
+<!-- DEVIL FRUITS -->
+<div class="section" id="section-fruits">
+  <div class="sh"><span class="st">Devil Fruits</span><span class="sc2">9 entries</span></div>
+  <p class="sd">Cursed fruits granting extraordinary powers at the cost of swimming. Three classes: Paramecia, Logia, Zoan.</p>
+  <div class="grid">
+    <div class="card" onclick="om('gomu')"><div class="ci"><span class="rb">3%</span>🫧</div><div class="cb"><div class="cn">Gomu Gomu no Mi</div><div class="cs">Luffy — True: Model Nika</div><div class="ct"><span class="tag tmy">Mythic Zoan</span></div></div></div>
+    <div class="card" onclick="om('mera')"><div class="ci"><span class="rb">6%</span>🔥</div><div class="cb"><div class="cn">Mera Mera no Mi</div><div class="cs">Portgas D. Ace → Sabo</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tl">Logia</span></div></div></div>
+    <div class="card" onclick="om('gura')"><div class="ci"><span class="rb">2%</span>🌊</div><div class="cb"><div class="cn">Gura Gura no Mi</div><div class="cs">Whitebeard → Blackbeard</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag tp">Paramecia</span></div></div></div>
+    <div class="card" onclick="om('ope')"><div class="ci"><span class="rb">5%</span>⭕</div><div class="cb"><div class="cn">Ope Ope no Mi</div><div class="cs">Trafalgar Law</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tp">Paramecia</span></div></div></div>
+    <div class="card" onclick="om('ito')"><div class="ci"><span class="rb">8%</span>🕸️</div><div class="cb"><div class="cn">Ito Ito no Mi</div><div class="cs">Doflamingo</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag tp">Paramecia</span></div></div></div>
+    <div class="card" onclick="om('yami')"><div class="ci"><span class="rb">2%</span>🌑</div><div class="cb"><div class="cn">Yami Yami no Mi</div><div class="cs">Blackbeard</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tl">Logia</span></div></div></div>
+    <div class="card" onclick="om('hie')"><div class="ci"><span class="rb">7%</span>🧊</div><div class="cb"><div class="cn">Hie Hie no Mi</div><div class="cs">Aokiji</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag tl">Logia</span></div></div></div>
+    <div class="card" onclick="om('bari')"><div class="ci"><span class="rb">12%</span>🛡️</div><div class="cb"><div class="cn">Bari Bari no Mi</div><div class="cs">Bartolomeo</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag tp">Paramecia</span></div></div></div>
+    <div class="card" onclick="om('hana')"><div class="ci"><span class="rb">15%</span>🌸</div><div class="cb"><div class="cn">Hana Hana no Mi</div><div class="cs">Nico Robin</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag tp">Paramecia</span></div></div></div>
+  </div>
+</div>
+
+<!-- MARTIAL ARTS -->
+<div class="section" id="section-martial">
+  <div class="sh"><span class="st">Martial Arts</span><span class="sc2">5 entries</span></div>
+  <p class="sd">Hand-to-hand and weapon-based disciplines distinct from swordsmanship. Mastery shapes raw fighting output.</p>
+  <div class="grid">
+    <div class="card" onclick="om('rokushiki')"><div class="ci"><span class="rb">4%</span>🌀</div><div class="cb"><div class="cn">Rokushiki</div><div class="cs">Six Powers — Government Style</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tm">Martial</span></div></div></div>
+    <div class="card" onclick="om('blackleg')"><div class="ci"><span class="rb">9%</span>🦵</div><div class="cb"><div class="cn">Black Leg Style</div><div class="cs">Sanji</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag tm">Martial</span></div></div></div>
+    <div class="card" onclick="om('fishman_karate')"><div class="ci"><span class="rb">7%</span>🌊</div><div class="cb"><div class="cn">Fish-Man Karate</div><div class="cs">Jinbe</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag tm">Martial</span></div></div></div>
+    <div class="card" onclick="om('jioken')"><div class="ci"><span class="rb">5%</span>🤜</div><div class="cb"><div class="cn">Jio-Ken</div><div class="cs">Earthquake Fist</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tm">Martial</span></div></div></div>
+    <div class="card" onclick="om('fistlove')"><div class="ci"><span class="rb">6%</span>❤️</div><div class="cb"><div class="cn">Fist of Love</div><div class="cs">Monkey D. Garp</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tm">Martial</span></div></div></div>
+  </div>
+</div>
+
+<!-- MOVESETS -->
+<div class="section" id="section-movesets">
+  <div class="sh"><span class="st">New Movesets</span><span class="sc2">7 entries</span></div>
+  <p class="sd">Expanded technique trees for new and existing fighting styles.</p>
+  <div class="grid">
+    <div class="card" onclick="om('quake_ms')"><div class="ci"><span class="rb">2%</span>💢</div><div class="cb"><div class="cn">Quake — Gura Style</div><div class="cs">Tremor-based Combat</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag tp">Paramecia</span></div></div></div>
+    <div class="card" onclick="om('kage_ms')"><div class="ci"><span class="rb">5%</span>🌑</div><div class="cb"><div class="cn">Kage — Shadow Arts</div><div class="cs">Darkness &amp; Shadow Control</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tl">Logia</span></div></div></div>
+    <div class="card" onclick="om('mera_ms')"><div class="ci"><span class="rb">6%</span>🔥</div><div class="cb"><div class="cn">Mera — Flame Combat</div><div class="cs">Fire Offense &amp; Mobility</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tl">Logia</span></div></div></div>
+    <div class="card" onclick="om('ope_ms')"><div class="ci"><span class="rb">5%</span>⭕</div><div class="cb"><div class="cn">Ope — Surgeon of Death</div><div class="cs">ROOM-based Domination</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tp">Paramecia</span></div></div></div>
+    <div class="card" onclick="om('jioken_ms')"><div class="ci"><span class="rb">5%</span>🤜</div><div class="cb"><div class="cn">Jio-Ken Techniques</div><div class="cs">Seismic Fist Tree</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tm">Martial</span></div></div></div>
+    <div class="card" onclick="om('fistlove_ms')"><div class="ci"><span class="rb">6%</span>❤️</div><div class="cb"><div class="cn">Fist of Love</div><div class="cs">Garp's Iron Fist School</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tm">Martial</span></div></div></div>
+    <div class="card" onclick="om('kanabo_ms')"><div class="ci"><span class="rb">4%</span>🪵</div><div class="cb"><div class="cn">Kanabo — Club Arts</div><div class="cs">Kaido's Iron Club</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tm">Martial</span></div></div></div>
+  </div>
+</div>
+
+<!-- ARMAMENT -->
+<div class="section" id="section-armament">
+  <div class="sh"><span class="st">Armament Haki</span><span class="sc2">Busoshoku</span></div>
+  <p class="sd">Spiritual armor manifested from willpower. Bypasses Logia intangibility. Advanced form destroys from within.</p>
+  <div class="grid">
+    <div class="card" onclick="om('arm_basic')"><div class="ci"><span class="rb">40%</span>🖤</div><div class="cb"><div class="cn">Basic Hardening</div><div class="cs">Entry-level Armament</div><div class="ct"><span class="tag tc">Common</span><span class="tag ta">Armament</span></div></div></div>
+    <div class="card" onclick="om('arm_ryou')"><div class="ci"><span class="rb">12%</span>💀</div><div class="cb"><div class="cn">Ryou — Internal Destruction</div><div class="cs">Advanced Armament</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ta">Armament</span></div></div></div>
+    <div class="card" onclick="om('arm_coat')"><div class="ci"><span class="rb">5%</span>⚡</div><div class="cb"><div class="cn">Conqueror Coating</div><div class="cs">Haoshoku-imbued Strikes</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag ta">Armament</span></div></div></div>
+  </div>
+</div>
+
+<!-- OBSERVATION -->
+<div class="section" id="section-observation">
+  <div class="sh"><span class="st">Observation Haki</span><span class="sc2">Kenbunshoku</span></div>
+  <p class="sd">Sixth sense for detecting intent and presence. Its apex — Future Sight — previews seconds ahead.</p>
+  <div class="grid">
+    <div class="card" onclick="om('obs_basic')"><div class="ci"><span class="rb">45%</span>👁️</div><div class="cb"><div class="cn">Basic Observation</div><div class="cs">Aura Detection</div><div class="ct"><span class="tag tc">Common</span><span class="tag to">Observation</span></div></div></div>
+    <div class="card" onclick="om('obs_future')"><div class="ci"><span class="rb">8%</span>🔮</div><div class="cb"><div class="cn">Future Sight</div><div class="cs">Advanced Observation</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag to">Observation</span></div></div></div>
+    <div class="card" onclick="om('obs_range')"><div class="ci"><span class="rb">3%</span>🌐</div><div class="cb"><div class="cn">Island-Scale Detection</div><div class="cs">Shanks / Enel Tier</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag to">Observation</span></div></div></div>
+  </div>
+</div>
+
+<!-- CONQUEROR -->
+<div class="section" id="section-conqueror">
+  <div class="sh"><span class="st">Conqueror's Haki</span><span class="sc2">Haoshoku</span></div>
+  <p class="sd">Cannot be trained. Born with it or not. One in a million. Advanced form coats attacks in black lightning.</p>
+  <div class="grid">
+    <div class="card" onclick="om('con_basic')"><div class="ci"><span class="rb">2%</span>👑</div><div class="cb"><div class="cn">Conqueror's Burst</div><div class="cs">Passive Willpower Emission</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tk">Conqueror</span></div></div></div>
+    <div class="card" onclick="om('con_coat')"><div class="ci"><span class="rb">0.5%</span>⚡</div><div class="cb"><div class="cn">Conqueror Coating</div><div class="cs">Black Lightning Strikes</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag tk">Conqueror</span></div></div></div>
+  </div>
+</div>
+
+<!-- BOUNTY -->
+<div class="section" id="section-bounty">
+  <div class="sh"><span class="st">Bounty System</span><span class="sc2">System</span></div>
+  <p class="sd">Bounties reflect threat level as assessed by the World Government. Rise through notable acts, victories, and reputation.</p>
+  <div class="grid">
+    <div class="card" onclick="om('b1')"><div class="ci"><span class="rb">—</span>🪙</div><div class="cb"><div class="cn">Unknown / No Bounty</div><div class="cs">0 — 9,999,999 Berries</div><div class="ct"><span class="tag tc">Common</span><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('b2')"><div class="ci"><span class="rb">—</span>💵</div><div class="cb"><div class="cn">Notable Pirate</div><div class="cs">10M — 99,999,999</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('b3')"><div class="ci"><span class="rb">—</span>💎</div><div class="cb"><div class="cn">Supernova-Class</div><div class="cs">100M — 999,999,999</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('b4')"><div class="ci"><span class="rb">—</span>🏆</div><div class="cb"><div class="cn">Emperor-Class</div><div class="cs">1B — 3,999,999,999</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('b5')"><div class="ci"><span class="rb">—</span>☠️</div><div class="cb"><div class="cn">World Threat</div><div class="cs">4B+ Berries</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag tsys">System</span></div></div></div>
+  </div>
+</div>
+
+<!-- CREW -->
+<div class="section" id="section-crew">
+  <div class="sh"><span class="st">Crew System</span><span class="sc2">System</span></div>
+  <p class="sd">Crews are the backbone of pirate society. Rank, roles, and fleet structure define power and reach.</p>
+  <div class="grid">
+    <div class="card" onclick="om('crew_roles')"><div class="ci"><span class="rb">—</span>🏴‍☠️</div><div class="cb"><div class="cn">Crew Roles</div><div class="cs">Captain, First Mate, Officers...</div><div class="ct"><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('crew_tiers')"><div class="ci"><span class="rb">—</span>📊</div><div class="cb"><div class="cn">Crew Tiers</div><div class="cs">Rookie → Yonko Fleet</div><div class="ct"><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('crew_alliance')"><div class="ci"><span class="rb">—</span>🤝</div><div class="cb"><div class="cn">Alliance System</div><div class="cs">Cross-crew Cooperation</div><div class="ct"><span class="tag tsys">System</span></div></div></div>
+  </div>
+</div>
+
+<!-- MARINE -->
+<div class="section" id="section-marine">
+  <div class="sh"><span class="st">Marine System</span><span class="sc2">System</span></div>
+  <p class="sd">The World Government's military arm. Rank is earned through merit, politics, and power.</p>
+  <div class="grid">
+    <div class="card" onclick="om('mar_ranks')"><div class="ci"><span class="rb">—</span>⚓</div><div class="cb"><div class="cn">Marine Ranks</div><div class="cs">Seaman → Fleet Admiral</div><div class="ct"><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('mar_hq')"><div class="ci"><span class="rb">—</span>🏛️</div><div class="cb"><div class="cn">HQ Structure</div><div class="cs">Admirals, Vice Admirals, HQ</div><div class="ct"><span class="tag tsys">System</span></div></div></div>
+    <div class="card" onclick="om('mar_justice')"><div class="ci"><span class="rb">—</span>⚖️</div><div class="cb"><div class="cn">Absolute vs Moral Justice</div><div class="cs">The Philosophical Split</div><div class="ct"><span class="tag tsys">System</span></div></div></div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="section" id="section-progression">
+  <div class="sh"><span class="st">Progression</span><span class="sc2">4 Trees</span></div>
+  <p class="sd">Each path has its own mastery curve. Progress is earned — never given.</p>
+  <div class="sst">🍎 Devil Fruit Progression</div>
+  <table class="pt"><tr><th>Stage</th><th>Name</th><th>Description</th></tr>
+    <tr><td>1</td><td>Awakening Seed</td><td>Fruit consumed. Powers accessible but unrefined. High stamina cost on all abilities.</td></tr>
+    <tr><td>2</td><td>Control</td><td>Core techniques unlocked. Elemental transformation stable (Logia). Forms reliable.</td></tr>
+    <tr><td>3</td><td>Mastery</td><td>Full moveset accessible. Haki synergy begins. Stamina cost greatly reduced.</td></tr>
+    <tr><td>4</td><td>Awakening</td><td>Rare threshold. Affects environment, not just body. Transforms combat fundamentally.</td></tr>
+    <tr><td>5</td><td>True Form</td><td>Mythic Zoans only. Identity fully unlocked. Power scales with imagination.</td></tr>
+  </table>
+  <div class="sst">⚡ Haki Progression</div>
+  <table class="pt"><tr><th>Stage</th><th>Name</th><th>Description</th></tr>
+    <tr><td>1</td><td>Dormant</td><td>Exists but cannot be consciously activated. Occasional instinctive bursts only.</td></tr>
+    <tr><td>2</td><td>Awakened</td><td>Conscious activation. Basic armament coating or presence detection online.</td></tr>
+    <tr><td>3</td><td>Trained</td><td>Reliable in combat. Armament penetration of Logia. Observation aura sensing.</td></tr>
+    <tr><td>4</td><td>Advanced</td><td>Ryou (internal) for Armament. Future Sight for Observation. Burst for Conqueror.</td></tr>
+    <tr><td>5</td><td>Supreme</td><td>Conqueror coating unlocked. Island-range Observation. Ryou through weapons and terrain.</td></tr>
+  </table>
+  <div class="sst">👊 Martial Arts Progression</div>
+  <table class="pt"><tr><th>Stage</th><th>Name</th><th>Description</th></tr>
+    <tr><td>1</td><td>Novice</td><td>Basic strikes. No style-specific techniques unlocked yet.</td></tr>
+    <tr><td>2</td><td>Practitioner</td><td>Core style moves available. Footwork and timing improve significantly.</td></tr>
+    <tr><td>3</td><td>Expert</td><td>Full technique set unlocked. Style-specific enhancements online.</td></tr>
+    <tr><td>4</td><td>Master</td><td>Haki integration. Signature finishing moves unlocked.</td></tr>
+    <tr><td>5</td><td>Grandmaster</td><td>Style transcended. Unique personal techniques. Can teach others.</td></tr>
+  </table>
+  <div class="sst">🗡️ Swordsmanship Progression</div>
+  <table class="pt"><tr><th>Stage</th><th>Name</th><th>Description</th></tr>
+    <tr><td>1</td><td>Untrained</td><td>Basic swings. Cannot control blade momentum or channel intent.</td></tr>
+    <tr><td>2</td><td>Student</td><td>Fundamentals solid. Standard cuts and parries reliable.</td></tr>
+    <tr><td>3</td><td>Skilled</td><td>Style-specific moves online. Aerial and multi-hit combos available.</td></tr>
+    <tr><td>4</td><td>Elite</td><td>Haki-infused strikes. Pressure waves. High-grade sword tamed.</td></tr>
+    <tr><td>5</td><td>World's Finest</td><td>Absolute pinnacle. One per era. Strikes that cut nothing and everything.</td></tr>
+  </table>
+</div>
+
+<!-- SWORD DROPS -->
+<div class="section" id="section-sworddrops">
+  <div class="sh"><span class="st">Graded Sword Boss Drops</span><span class="sc2">6 grades</span></div>
+  <p class="sd">Weapons obtained from defeating powerful enemies. Grade sets the floor; mastery and Haki define the ceiling.</p>
+  <div class="grid">
+    <div class="card" onclick="om('drop_common')"><div class="ci"><span class="rb">40%</span>🗡️</div><div class="cb"><div class="cn">Common Blade</div><div class="cs">No grade — unnamed</div><div class="ct"><span class="tag tc">Common</span><span class="tag tboss">Drop</span></div></div></div>
+    <div class="card" onclick="om('drop_waza')"><div class="ci"><span class="rb">20%</span>⚔️</div><div class="cb"><div class="cn">Wazamono</div><div class="cs">Grade Sword — 50 total</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag tboss">Drop</span></div></div></div>
+    <div class="card" onclick="om('drop_owaza')"><div class="ci"><span class="rb">10%</span>🌟</div><div class="cb"><div class="cn">O Wazamono</div><div class="cs">Great Grade — 21 total</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag tboss">Drop</span></div></div></div>
+    <div class="card" onclick="om('drop_saijo')"><div class="ci"><span class="rb">3%</span>🌙</div><div class="cb"><div class="cn">Saijo O Wazamono</div><div class="cs">Supreme Grade — 12 total</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tboss">Drop</span></div></div></div>
+    <div class="card" onclick="om('drop_cursed')"><div class="ci"><span class="rb">7%</span>🩸</div><div class="cb"><div class="cn">Cursed Blade</div><div class="cs">Kitetsu lineage — 3 exist</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag tboss">Drop</span></div></div></div>
+    <div class="card" onclick="om('drop_black')"><div class="ci"><span class="rb">1%</span>⬛</div><div class="cb"><div class="cn">Black Blade</div><div class="cs">Permanent Haki Coating</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag tboss">Drop</span></div></div></div>
+  </div>
+</div>
+
+<!-- TRAITS -->
+<div class="section" id="section-traits">
+  <div class="sh"><span class="st">Traits</span><span class="sc2">12 entries</span></div>
+  <p class="sd">Passive bonuses and modifiers. Rolled at character creation or acquired through specific events. Stack unless stated otherwise.</p>
+  <div class="grid grid2">
+    <div class="card" onclick="om('t_will')"><div class="ci ci2"><span class="rb">15%</span>🔥</div><div class="cb"><div class="cn">Unbreakable Will</div><div class="cs">Refuse KOs under HP threshold — once per encounter</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_haki')"><div class="ci ci2"><span class="rb">10%</span>⚡</div><div class="cb"><div class="cn">Haki Prodigy</div><div class="cs">Haki training speed doubled; awakenings unlock faster</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_conq')"><div class="ci ci2"><span class="rb">2%</span>👑</div><div class="cb"><div class="cn">Conqueror's Blood</div><div class="cs">Latent Haoshoku — unlockable via milestone</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_mar')"><div class="ci ci2"><span class="rb">8%</span>⚓</div><div class="cb"><div class="cn">Marine Lineage</div><div class="cs">Starts with basic Rokushiki; Marine rep bonus</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_curse')"><div class="ci ci2"><span class="rb">5%</span>💀</div><div class="cb"><div class="cn">Cursed Fate</div><div class="cs">Higher roll ceilings; higher injury chance; luck penalty</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_fruit')"><div class="ci ci2"><span class="rb">7%</span>🍎</div><div class="cb"><div class="cn">Devil's Affinity</div><div class="cs">Fruit mastery stages unlock one tier faster</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_giant')"><div class="ci ci2"><span class="rb">3%</span>🗿</div><div class="cb"><div class="cn">Giant Blood</div><div class="cs">HP and strength up; agility down</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_shadow')"><div class="ci ci2"><span class="rb">6%</span>🌑</div><div class="cb"><div class="cn">Shadow Walker</div><div class="cs">Reduced Observation footprint; ambush bonus</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_sea')"><div class="ci ci2"><span class="rb">4%</span>🌊</div><div class="cb"><div class="cn">Child of the Sea</div><div class="cs">No water movement penalty; ocean combat bonus</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_beast')"><div class="ci ci2"><span class="rb">5%</span>🐉</div><div class="cb"><div class="cn">Beast Instinct</div><div class="cs">Zoan hybrid bonus higher; form more stable</div><div class="ct"><span class="tag tleg">Rare</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_iron')"><div class="ci ci2"><span class="rb">12%</span>🛡️</div><div class="cb"><div class="cn">Iron Body</div><div class="cs">Passive damage reduction; Tekkai affinity</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag ttr">Trait</span></div></div></div>
+    <div class="card" onclick="om('t_d')"><div class="ci ci2"><span class="rb">1%</span>😁</div><div class="cb"><div class="cn">Will of D.</div><div class="cs">Cannot be fully broken; enemy of God; draws chaos</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag ttr">Trait</span></div></div></div>
+  </div>
+</div>
+
+<!-- RACES -->
+<div class="section" id="section-races">
+  <div class="sh"><span class="st">Races</span><span class="sc2">8 entries</span></div>
+  <p class="sd">Race determines baseline stats, passive abilities, and available trait pools. Rolled at character creation.</p>
+  <div class="grid">
+    <div class="card" onclick="om('r_human')"><div class="ci"><span class="rb">35%</span>🧑</div><div class="cb"><div class="cn">Human</div><div class="cs">Most versatile — no restrictions</div><div class="ct"><span class="tag tc">Common</span><span class="tag tr">Race</span></div></div></div>
+    <div class="card" onclick="om('r_fish')"><div class="ci"><span class="rb">12%</span>🐟</div><div class="cb"><div class="cn">Fish-Man / Merman</div><div class="cs">10x human strength; ocean mastery</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag tr">Race</span></div></div></div>
+    <div class="card" onclick="om('r_mink')"><div class="ci"><span class="rb">10%</span>🐺</div><div class="cb"><div class="cn">Mink</div><div class="cs">Electro ability; Sulong transformation</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag tr">Race</span></div></div></div>
+    <div class="card" onclick="om('r_giant')"><div class="ci"><span class="rb">8%</span>🗿</div><div class="cb"><div class="cn">Giant</div><div class="cs">Massive strength and HP; agility reduced</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag tr">Race</span></div></div></div>
+    <div class="card" onclick="om('r_ancgiant')"><div class="ci"><span class="rb">3%</span>🏔️</div><div class="cb"><div class="cn">Ancient Giant</div><div class="cs">New — Elbaph bloodline; mythic scale</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tr">Race</span></div></div></div>
+    <div class="card" onclick="om('r_oni')"><div class="ci"><span class="rb">4%</span>👹</div><div class="cb"><div class="cn">Oni</div><div class="cs">New — Wano bloodline; supernatural toughness</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag tr">Race</span></div></div></div>
+    <div class="card" onclick="om('r_primalmink')"><div class="ci"><span class="rb">2%</span>🌕</div><div class="cb"><div class="cn">Primal Mink</div><div class="cs">New — Permanent Sulong; feral instinct</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag tr">Race</span></div></div></div>
+    <div class="card" onclick="om('r_uranus')"><div class="ci"><span class="rb">0.5%</span>🌌</div><div class="cb"><div class="cn">Uranus Descendant</div><div class="cs">New — Ancient Weapon bloodline</div><div class="ct"><span class="tag tmy">Mythic</span><span class="tag tr">Race</span></div></div></div>
+  </div>
+</div>
+
+<!-- BACKSTORY -->
+<div class="section" id="section-backstory">
+  <div class="sh"><span class="st">Backstory &amp; Trait Roll</span><span class="sc2">Overhaul</span></div>
+  <p class="sd">Character creation begins with an origin roll. Your backstory shapes starting traits, stat bonuses, and faction alignment.</p>
+  <div class="grid">
+    <div class="card" onclick="om('bk_pirate')"><div class="ci"><span class="rb">25%</span>🏴‍☠️</div><div class="cb"><div class="cn">Pirate Heritage</div><div class="cs">Born into a pirate crew</div><div class="ct"><span class="tag tc">Common</span><span class="tag ttr">Origin</span></div></div></div>
+    <div class="card" onclick="om('bk_marine')"><div class="ci"><span class="rb">20%</span>⚓</div><div class="cb"><div class="cn">Marine Family</div><div class="cs">World Government doctrine upbringing</div><div class="ct"><span class="tag tc">Common</span><span class="tag ttr">Origin</span></div></div></div>
+    <div class="card" onclick="om('bk_noble')"><div class="ci"><span class="rb">10%</span>🏰</div><div class="cb"><div class="cn">Noble Blood</div><div class="cs">Royal or Celestial Dragon lineage</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag ttr">Origin</span></div></div></div>
+    <div class="card" onclick="om('bk_slave')"><div class="ci"><span class="rb">10%</span>⛓️</div><div class="cb"><div class="cn">Escaped Slave</div><div class="cs">Survived Mariejoa — burns with hatred</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag ttr">Origin</span></div></div></div>
+    <div class="card" onclick="om('bk_rev')"><div class="ci"><span class="rb">8%</span>✊</div><div class="cb"><div class="cn">Revolutionary</div><div class="cs">Dragon's Army — anti-government ideology</div><div class="ct"><span class="tag tu">Uncommon</span><span class="tag ttr">Origin</span></div></div></div>
+    <div class="card" onclick="om('bk_void')"><div class="ci"><span class="rb">3%</span>❓</div><div class="cb"><div class="cn">Unknown Origin — Void</div><div class="cs">No records. No past. Highest trait variance.</div><div class="ct"><span class="tag tleg">Legendary</span><span class="tag ttr">Origin</span></div></div></div>
+  </div>
 </div>
 
 </main>
 </div>
 
-<!-- MODAL POPUP WITH EXPANDABLE SECTIONS -->
+<!-- MODAL -->
 <div class="modal-overlay" id="mo" onclick="cmob(event)">
-    <div class="modal">
-        <div class="mh">
-            <div class="me" id="me"></div>
-            <div style="flex:1;min-width:0">
-                <div class="mt" id="mt"></div>
-                <div class="ms" id="msu"></div>
-            </div>
-            <button class="mc" onclick="cm()">✕</button>
-        </div>
-        <img id="mi" class="mi" src="" alt="Modal image">
-        
-        <!-- EXPANDABLE DETAIL TABS -->
-        <div class="detail-tabs" id="dt"></div>
-        
-        <div class="mb" id="mb"></div>
+  <div class="modal">
+    <div class="mh">
+      <div class="me" id="me"></div>
+      <div style="flex:1;min-width:0"><div class="mt" id="mt"></div><div class="ms" id="msu"></div></div>
+      <button class="mc" onclick="cm()">✕</button>
     </div>
+    <div class="mb" id="mb"></div>
+  </div>
 </div>
 
 <script>
-// ========================================
-// DATA DATABASE WITH DETAIL SECTIONS
-// ========================================
-const D = {
-    rokushiki: {
-        e: '🌀',
-        t: 'Rokushiki',
-        s: 'Six Powers — World Government Style',
-        r: 4,
-        img: 'https://via.placeholder.com/560x250?text=Rokushiki',
-        d: 'The elite combat system of CP9 and CP0. Six fundamental techniques form the foundation of advanced WG martial arts.',
-        stats: [
-            ['Organization', 'World Government'],
-            ['User Tier', 'Elite'],
-            ['Difficulty', 'Very High']
-        ],
-        // NEW: Detail sections with tabs
-        details: [
-            {
-                name: 'Overview',
-                icon: '📖',
-                content: '<p>Rokushiki represents the pinnacle of government-trained martial arts. Each technique enhances physical capabilities beyond normal human limits, forming a cohesive system rather than isolated moves.</p>'
-            },
-            {
-                name: 'Passive',
-                icon: '⚡',
-                content: '<p><strong>Passive Effect:</strong> Natural body conditioning grants +15% physical defense and +10% movement speed at all times.</p><p><strong>Awakening Bonus:</strong> At mastery level, gain temporary immunity to crowd control once per combat.</p>'
-            },
-            {
-                name: 'Abilities',
-                icon: '💥',
-                content: '<ul><li><strong>Soru (Shave):</strong> Burst movement technique. Close distance instantly.</li><li><strong>Geppo (Sky Walk):</strong> Air-stepping allows mid-air movement.</li><li><strong>Tekkai (Iron Body):</strong> Harden body to reduce all damage.</li><li><strong>Shigan (Finger Gun):</strong> Finger strikes pierce armor.</li><li><strong>Ranzuan (Tempest Kick):</strong> High-speed leg strikes create wind blades.</li><li><strong>Kamie (Paper Art):</strong> Body flexibility dodge incoming attacks.</li></ul>'
-            },
-            {
-                name: 'Mastery',
-                icon: '🎯',
-                content: '<div class="sr"><span class="sl">Stage 1</span><span class="sv">Novice - Basic techniques only</span></div><div class="sr"><span class="sl">Stage 2</span><span class="sv">Intermediate - 3-4 techniques fluent</span></div><div class="sr"><span class="sl">Stage 3</span><span class="sv">Advanced - Full suite, combinations</span></div><div class="sr"><span class="sl">Stage 4</span><span class="sv">Master - Techniques integrated with Haki</span></div>'
-            }
-        ]
-    },
-
-    blackleg: {
-        e: '🦵',
-        t: 'Black Leg Style',
-        s: 'Sanji — Cook\'s Creed',
-        r: 9,
-        img: 'https://via.placeholder.com/560x250?text=Black+Leg',
-        d: 'Entirely leg-based combat. Arms deliberately unused to protect the cook\'s hands.',
-        stats: [
-            ['User', 'Sanji (Straw Hat Pirates)'],
-            ['Specialty', 'Speed & Power'],
-            ['Difficulty', 'High']
-        ],
-        details: [
-            {
-                name: 'Overview',
-                icon: '📖',
-                content: '<p>A martial art centered on devastating leg techniques. The philosophy: hands are sacred to a cook, so never use them in combat.</p>'
-            },
-            {
-                name: 'Passive',
-                icon: '⚡',
-                content: '<p><strong>Cook\'s Honor:</strong> Hands cannot be damaged or used for attacks. All damage dealt through legs only.</p><p><strong>Fire Affinity:</strong> At high levels, gain ability to infuse legs with fire (Diable Jambe).</p><p><strong>Speed Boost:</strong> +20% leg speed naturally.</p>'
-            },
-            {
-                name: 'Techniques',
-                icon: '💥',
-                content: '<ul><li><strong>Axe Kick:</strong> Downward heel strike with crushing force.</li><li><strong>Sky Walk Kick:</strong> Aerial follow-up attacks.</li><li><strong>Spinning Kick:</strong> Multi-hit rotation attack.</li><li><strong>Diable Jambe (Fire Leg):</strong> Legs catch fire, massively amplifying power.</li><li><strong>Ifrit Jambe:</strong> Advanced fire technique with environmental damage.</li></ul>'
-            },
-            {
-                name: 'Evolution',
-                icon: '🔄',
-                content: '<p><strong>Germa Genes:</strong> Upon awakening genetic potential, body gains exoskeleton resilience and enhanced regeneration.</p><p>This hybrid form combines cook discipline with superhuman enhancements.</p>'
-            }
-        ]
-    },
-
-    fishman_karate: {
-        e: '🌊',
-        t: 'Fish-Man Karate',
-        s: 'Water-based combat mastery',
-        r: 7,
-        img: 'https://via.placeholder.com/560x250?text=Fish-Man+Karate',
-        d: 'Manipulates water molecules in air and opponent\'s body to generate devastating strikes.',
-        stats: [
-            ['User', 'Jinbe (Straw Hat Pirates)'],
-            ['Element', 'Water'],
-            ['Difficulty', 'Very High']
-        ],
-        details: [
-            {
-                name: 'Overview',
-                icon: '📖',
-                content: '<p>An ancient art taught exclusively to Fish-Men, leveraging their aquatic affinity. Strikes channel water pressure through the environment and through living tissue.</p>'
-            },
-            {
-                name: 'Passive',
-                icon: '⚡',
-                content: '<p><strong>Water Body:</strong> No movement penalty in water or wet environments.</p><p><strong>Pressure Resistance:</strong> Natural resistance to pressure-based attacks.</p><p><strong>Hydration Bond:</strong> Heal slowly when in contact with water (0.5% per turn).</p>'
-            },
-            {
-                name: 'Techniques',
-                icon: '💥',
-                content: '<ul><li><strong>Water Current Fist:</strong> Strike channels water pressure through target.</li><li><strong>Shifting Current:</strong> Redirect incoming attacks into water channels.</li><li><strong>Sea King Blow:</strong> Summon water mass for devastating area attack.</li><li><strong>Gyoncorde Technique:</strong> Internal water manipulation technique.</li></ul>'
-            },
-            {
-                name: 'Requirements',
-                icon: '⚓',
-                content: '<p><strong>Race:</strong> Fish-Man or Merman strongly preferred (works for humans but reduced efficiency).</p><p><strong>Training:</strong> Must learn from Fish-Man masters or ancient texts.</p><p><strong>Mastery:</strong> Requires deep water meditation and connection to ocean.</p>'
-            }
-        ]
-    }
+const D={
+    
+    santoryu: { e: '⚔️', t: 'Three Sword Style', s: 'Three-Sword Style', r: 30, d: 'You have decided to take up a rather unique type of swordsmanship, by using three swords with your mouth, or an extra appendage, you have decided that the more swords you have the stronger you will be.', stats: [['Command', '!3swordstylemoveset'], ['Passive', 'MAAI MASTERY - If your opponent attacks first upon the start of combat, the cooldown of your incoming attack is instantly refreshed. Additionally, every 3 times you take damage, your damage increases by 5+ up to 3 times in all sources.'], ['Progression', 'Asura'], ['Damage Type', 'Slashing']]},
+nitoryu:{e:'⚔️',t:'Nitoryu',s:'Two-Sword Style',r:18,d:'Dual-wield swordsmanship. More offensively versatile than single-sword and far more accessible than three-sword. Specializations: cross-slash tempo-based alternating patterns, defensive X-guard. Most serious swordsmen who favor aggression land here.',stats:[['Style','2-Sword'],['Versatility','High'],['Haki Synergy','Natural — both blades benefit'],['Notable','Various practitioners across the world']]},
+ittoryu:{e:'🗡️',t:'Ittoryu',s:'One-Sword Style',r:30,d:'The foundational form. Single blade, maximum focus. The world\'s greatest swordsmen historically favor this: Mihawk uses one sword exclusively. Precision over volume. The cleanest, most efficient cuts come from this school. Mastery produces pressure waves from sheer cutting force.',stats:[['Style','1-Sword'],['Philosophy','Precision > Volume'],['Peak','Mihawk — Supreme Grade Ittoryu'],['Roll','Most common sword style at creation']]},
+kyutoryu:{e:'🌀',t:'Kyutoryu — Asura',s:'Nine-Sword Illusion via Conqueror Burst',r:2,d:'Not a sustained form — a peak Conqueror burst technique unique to Zoro. Generates the visual and physical manifestation of nine swords through overlapping Haki pressure. Effectively triples offensive output in a single moment. Extremely stamina-intensive. Cannot be held.',stats:[['Visual','9 swords (illusory — Haki pressure)'],['Activation','Conqueror Haki burst required'],['Cost','Extreme stamina drain'],['Availability','Zoro-exclusive as implemented']]},
+supreme_blade:{e:'🌙',t:'Supreme Blade Path',s:'One per Era — Mihawk\'s Standard',r:1,d:'Not a style but a destination. The pinnacle of all swordsmanship. One person alive holds this title at a time — and you must surpass the current holder to claim it. Characterized by cuts that require no force, Haki so refined it permanently blackens the blade, and strikes that travel via air compression.',stats:[['Title','World\'s Greatest Swordsman'],['Current Holder','Dracule Mihawk'],['Requirement','Surpass the current holder in direct confrontation'],['Black Blade','Permanent Haki saturation — two exist']]},
+shura:{e:'🪦',t:'Shura — Dead Man\'s Draw',s:'Ryuma\'s Quick-Draw School',r:5,d:'A draw-strike discipline from Wano, traced to Ryuma the sword saint. The unsheathing motion is the decisive blow — one clean draw should end the fight. Practitioners must achieve total stillness before the draw. No hesitation permitted. Poor in sustained exchanges; dominates in burst scenarios.',stats:[['Origin','Wano — Ryuma lineage'],['Mechanic','Draw = decisive strike'],['Weakness','Requires patience; poor in prolonged fights'],['Ideal Blade','O Wazamono or higher']]},
+gomu:{e:'🫧',t:'Gomu Gomu no Mi',s:'True Identity: Hito Hito no Mi, Model: Nika',r:3,d:'Spent 800 years in World Government pursuit. In truth a Mythical Zoan — the God Fruit — disguised under a false name. Grants rubber body and Gear transformations. Awakening (Gear Fifth) lets reality bend to imagination. The sun god Nika\'s spirit manifests. The WG classified it as the most dangerous fruit in existence.',stats:[['Class','Mythical Zoan (disguised)'],['Awakening','Gear Fifth — Nika Form'],['Weakness','Seastone / Seawater'],['WG Classification','Most Dangerous Fruit in Existence']]},
+mera:{e:'🔥',t:'Mera Mera no Mi',s:'Logia — Fire Human',r:6,d:'Full fire transformation with flight via propulsion. Untouchable normally — opponents burn on contact. Critical weakness: Magu Magu no Mi (Magma) overrides fire in elemental hierarchy. This cost Ace his life at Marineford. Sabo now wields it.',stats:[['Class','Logia'],['Counter','Magu Magu no Mi — Magma overrides fire'],['Flight','Yes — fire jet propulsion'],['Current User','Sabo']]},
+gura:{e:'🌊',t:'Gura Gura no Mi',s:'Strongest Paramecia — Tremor Human',r:2,d:'Generates seismic vibrations capable of splitting air, ocean, and tectonic plates. Whitebeard casually tilted Marineford\'s geography. Blackbeard stole it post-mortem through an unknown method — combined with Yami Yami, which should be impossible. The only confirmed dual-fruit wielder.',stats:[['Class','Paramecia'],['Title','Strongest Paramecia in existence'],['Stolen By','Blackbeard after Whitebeard\'s death'],['Dual-Wield','Blackbeard — mechanism unknown']]},
+ope:{e:'⭕',t:'Ope Ope no Mi',s:'Ultimate Devil Fruit — 5 Billion Berry Valuation',r:5,d:'Generates a ROOM sphere with total spatial control inside. Organs, positions, and structures freely rearranged. Its ultimate technique — Perennial Youth Surgery — grants immortality to another person at the cost of the user\'s life. World Government valued this fruit at 5 billion berries.',stats:[['Class','Paramecia'],['ROOM','Spatial domain — scales with Haki size'],['Ultimate','Perennial Youth Surgery — user dies'],['Awakening','Environment becomes operating room']]},
+ito:{e:'🕸️',t:'Ito Ito no Mi',s:'Paramecia — String Human',r:8,d:'Razor strings strong enough to slice stone and steel. Puppet control, area barriers, Birdcage Awakening. The Birdcage is a city-scale contracting string cage that cannot be stopped by normal force — only destroying the user ends it. One of the most strategically complete fruits shown.',stats:[['Class','Paramecia'],['Awakening','Birdcage — city-scale string cage'],['Puppet Control','Full body override on target'],['Weakness','Extreme sustained heat (temporary)']]},
+yami:{e:'🌑',t:'Yami Yami no Mi',s:'Unique Logia — No Intangibility',r:2,d:'Only Logia that grants zero defensive intangibility. The user takes full damage from all physical attacks. In exchange: absolute gravity darkness that nullifies any Devil Fruit power on contact. The most dangerous anti-fruit tool, offset by total defensive vulnerability.',stats:[['Class','Logia (anomalous)'],['Defense','None — full damage taken'],['Special','Nullifies Devil Fruit ability on contact'],['Combined','Blackbeard uses this with Gura Gura simultaneously']]},
+hie:{e:'🧊',t:'Hie Hie no Mi',s:'Logia — Ice Human',r:7,d:'Total ice mastery. Can freeze the ocean surface across vast areas. Aokiji froze a bay solid for over a decade. Excellent area-denial and environmental control. Weakness: sustained heat and magma deteriorate the ice environment the user depends on.',stats:[['Class','Logia'],['Notable','Froze an ocean bay for 10+ years'],['Weakness','Sustained heat / Magma'],['Tactical','Area-denial and preservation — strategic value high']]},
+bari:{e:'🛡️',t:'Bari Bari no Mi',s:'Paramecia — Barrier Human',r:12,d:'Generates indestructible invisible barriers. Elizabello\'s King Punch — capable of threatening Yonko-level defenses — failed to crack it. Used offensively via barrier rams. Limitation: user must maintain focus and cannot move freely while holding barriers.',stats:[['Class','Paramecia'],['Barrier','Survived King Punch — among hardest impacts shown'],['Offensive Use','Ram constructs, barrier surfing'],['Weakness','Requires focus; restricted mobility while active']]},
+hana:{e:'🌸',t:'Hana Hana no Mi',s:'Paramecia — Flower-Flower Fruit',r:15,d:'Sprouts replicas of body parts from any surface. Pain on clones is reflected to the user. Used for restraint, reconnaissance, and combat. Awakening unlocks Demonio Fleur and Gigantesco Mano — colossal forms that fundamentally change the offensive scale.',stats:[['Class','Paramecia'],['Weakness','Pain reflects to user from clones'],['Awakening','Demonio Fleur / Gigantesco Mano'],['Recon','Remote sight and hearing via cloned sensory organs']]},
+rokushiki:{e:'🌀',t:'Rokushiki',s:'Six Powers — World Government Style',r:4,d:'The elite combat system of CP9 and CP0. Six techniques: Soru (speed burst), Geppo (air-stepping), Tekkai (iron body), Shigan (finger pistol), Rankyaku (leg blades), Kami-e (paper body). Few outside the World Government ever access it. Secret seventh: Rokuogan — internal shock via both fists simultaneously.',stats:[['Techniques','6 base + Rokuogan (7th, secret)'],['Access','WG agents primarily — rare outside'],['Peak','Lucci — highest recorded mastery'],['Haki Synergy','Tekkai + Armament = near-impenetrable defense']]},
+blackleg:{e:'🦵',t:'Black Leg Style',s:'Sanji — Cook\'s Creed',r:9,d:'Entirely leg-based. Arms deliberately unused in combat to protect the cook\'s hands. Diable Jambe generates fire through friction. Post-timeskip, internal genetic heat provides flame without friction. Ifrit Jambe combines Armament Haki with internal fire — highest single-strike output.',stats:[['Mechanic','Legs only — arms excluded from combat'],['Fire','Friction → internal heat post-timeskip'],['Peak','Ifrit Jambe + Armament Haki'],['User','Vinsmoke Sanji']]},
+fishman_karate:{e:'🌊',t:'Fish-Man Karate',s:'Water-based combat mastery',r:7,d:'Manipulates water molecules in the air and in the opponent\'s body to generate devastating strikes. Can send water-shock waves through targets without direct contact. Jinbe is the grandmaster. Combined with Fish-Man Jujutsu, can throw massive ships.',stats:[['Mechanism','Water molecule manipulation'],['Range','Strikes possible without direct contact'],['Grandmaster','Jinbe'],['Special','Can throw ships with sufficient technique']]},
+jioken:{e:'🤜',t:'Jio-Ken',s:'Earthquake Fist — Seismic Martial Art',r:5,d:'Channels physical force through the environment rather than directly at a target. Strikes generate seismic pulses that travel through ground and structures. Named for producing micro-quakes in a target\'s body on contact — mechanically similar to Ryou but through physical technique rather than Haki flow.',stats:[['Mechanism','Seismic pulse via strikes'],['Body Effect','Micro-tremors in target on contact'],['Terrain','Amplified on solid surfaces; can split stone flooring'],['Origin','Independent rare martial lineage']]},
+fistlove:{e:'❤️',t:'Fist of Love',s:'Monkey D. Garp — Iron Fist Doctrine',r:6,d:'Garp\'s philosophy made physical. No formal technique tree: the doctrine is that willpower and raw physicality alone suffice. Garp threw cannonballs barehanded and punched mountains. Armament Haki amplifies every strike. Characterized by blows delivered with the conviction that suffering is an expression of love.',stats:[['Philosophy','Suffering = love — not ironic'],['Signature','Cannonball hurling; mountain-crushing'],['Technique Tree','None — pure force + Haki'],['User','Monkey D. Garp']]},
+quake_ms:{e:'💢',t:'Quake — Gura Style Moveset',s:'Tremor combat tree',r:2,d:'Full moveset for Gura Gura no Mi users. Base moves: Quake Punch (air-cracking fist), Seaquake (ocean shockwave), Shima-yure (island tremor), Mugen Tekkai-Uchi (concentrated quake at point of contact). Awakening tier adds ground-wide shockwave pulses that travel through structures automatically.',stats:[['Base Moves','Quake Punch, Seaquake, Shima-yure'],['Advanced','Mugen Tekkai-Uchi — point quake'],['Awakening','Environmental tremor domain'],['Haki Synergy','Amplified significantly by Armament']]},
+kage_ms:{e:'🌑',t:'Kage — Shadow Arts Moveset',s:'Darkness and shadow combat tree',r:5,d:'Covers both shadow (Kage Kage no Mi) and darkness (Yami Yami) schools. Shadow moves: Brick Bat, Doppelman (shadow decoy), Shadow Asgard (mass soul absorption). Darkness moves: Black Hole (absorption vortex), Kurouzu (gravity pull). Yami hard-counters all other fruits on contact at the cost of taking full damage.',stats:[['Shadow Moves','Brick Bat, Doppelman, Shadow Asgard'],['Darkness Moves','Black Hole, Kurouzu'],['Yami Weakness','No intangibility — full damage always'],['Counter-Fruit','Yami nullifies any fruit on physical contact']]},
+mera_ms:{e:'🔥',t:'Mera — Flame Combat Moveset',s:'Fire offense and aerial mobility tree',r:6,d:'Moveset: Hiken (fire fist — signature), Enkai Hibashira (fire column), Entei (sun-scale explosion), Enkaku (fire propulsion flight). Awakening adds environmental ignition and area-of-effect sustained fire fields. All techniques are hard-countered by Magu Magu no Mi in elemental matchup.',stats:[['Signature','Hiken — Fire Fist'],['Peak','Entei (sun-scale)'],['Mobility','Full flight via fire propulsion'],['Counter','Magu Magu no Mi overrides all fire']]},
+ope_ms:{e:'⭕',t:'Ope — Surgeon of Death Moveset',s:'ROOM-based tactical domination',r:5,d:'Moveset: ROOM (domain activation), Shambles (position swap), Takt (telekinesis within ROOM), Amputate (non-lethal severing), Counter Shock (defibrillator burst), Gamma Knife (internal organ damage without cutting the surface), Kroom (internal ROOM inside target\'s body — Awakening). Perennial Youth Surgery is the ultimate — costs user\'s life.',stats:[['Domain','ROOM — spherical spatial control'],['Surgical Moves','Shambles, Takt, Gamma Knife, Kroom'],['Awakening','Kroom — ROOM planted inside target'],['Ultimate','Perennial Youth Surgery — self-sacrificing']]},
+jioken_ms:{e:'🤜',t:'Jio-Ken Technique Tree',s:'Seismic Fist full moveset',r:5,d:'Full tree: Jishin-ken (basic ground pulse), Rekka-ken (rapid seismic flurry), Daichi-yaburi (earth-splitting palm), Tectonic Slam (two-handed ground shatter), Jinrai-ken (thunderclap finishing blow — shockwave expands outward from impact point). Techniques gain power on solid surfaces and are weakened on soft ground or water.',stats:[['Starter','Jishin-ken — ground pulse'],['Combo','Rekka-ken — rapid flurry'],['Finisher','Jinrai-ken — expanding shockwave'],['Terrain','Enhanced on rock/solid; reduced on water/sand']]},
+fistlove_ms:{e:'❤️',t:'Fist of Love Moveset',s:'Garp\'s Iron Fist School full tree',r:6,d:'Moveset: Galaxy Impact (mountain-scale strike — signature), Iron Fist (Armament-coated punch), Cannonball Throw (improvised ranged), Vice Crush (bone-crushing grip), Love Tap (single devastating blow). Peak output: Conqueror Haki through bare knuckles — the highest expression of the style.',stats:[['Signature','Galaxy Impact'],['Ranged Option','Cannonball improvisation'],['Philosophy','Bare fists + Haki > any weapon'],['Peak','Conqueror-coat through knuckles']]},
+kanabo_ms:{e:'🪵',t:'Kanabo — Iron Club Mastery',s:'Kaido\'s Raimei Hakke school',r:4,d:'Full moveset for kanabo/club weapons, based on Kaido\'s Raimei Hakke. Techniques: Raimei Hakke (thunder bagua — horizontal arc at extreme force), Tsuji Giri (wide sweeping arc), Boro Breath (dragon breath combo — requires Zoan), Thunder Bagua Combo, Kanabo Slam (vertical overhead creating craters). Conqueror coating is the peak output.',stats:[['School','Raimei Hakke — Thunder Bagua'],['Signature','Raimei Hakke — one-hit KO level'],['Dragon Synergy','Boro Breath combo available with Zoan'],['Peak','Conqueror-coated Thunder Bagua']]},
+arm_basic:{e:'🖤',t:'Basic Armament Hardening',s:'Busoshoku — entry tier',r:40,d:'Coats body or weapon in spiritual energy, darkening the surface. Allows strikes against Logia users who would otherwise be intangible. Baseline protection increase. Cannot penetrate internal defenses or destroy from within — that requires Ryou.',stats:[['Tier','1 — Basic'],['Function','Surface coating + Logia bypass'],['Limitation','No internal destruction'],['Training','Accessible with focused discipline']]},
+arm_ryou:{e:'💀',t:'Ryou — Internal Destruction',s:'Advanced Armament — Wano tier',r:12,d:'Flows Haki through a target and detonates it internally rather than hardening externally. Bypasses surface-level Armament defenses entirely. Required to damage beings with extreme physical toughness like Kaido. Zoro and Luffy developed this during Wano under pressure.',stats:[['Tier','2 — Advanced'],['Mechanic','Internal Haki detonation'],['Counter to','External hardening — penetrates it'],['Required For','Damaging Yonko-class durability']]},
+arm_coat:{e:'⚡',t:'Conqueror Coating',s:'Haoshoku-imbued Armament',r:5,d:'Conqueror\'s Haki woven into attacks — produces black lightning discharge on impact. Amplifies strike force beyond what pure Armament achieves. Requires Haoshoku birthright. Kaido stated only a handful of people per era reach this. Luffy and Kaido both displayed it at Onigashima.',stats:[['Tier','3 — Supreme'],['Visual','Black lightning on impact'],['Requirement','Born Conqueror\'s Haki + power threshold'],['Amplification','Exceeds standard Armament significantly']]},
+obs_basic:{e:'👁️',t:'Basic Observation',s:'Aura detection and intent reading',r:45,d:'Detects living presences and emotional intent within a radius. Allows sensing incoming attacks before they land. The most common Haki form — virtually any serious fighter develops rudimentary Observation with enough combat experience.',stats:[['Tier','1 — Basic'],['Function','Presence detection, intent reading'],['Range','Nearby opponents'],['Counter','Extreme speed can outpace reaction time']]},
+obs_future:{e:'🔮',t:'Future Sight',s:'Advanced Observation — seconds ahead',r:8,d:'Previews moments into the immediate future. Katakuri demonstrated it reliably; Luffy developed it through combat instinct. Limitation: intense emotion or surprise disrupts it. An opponent acting without conscious intent is harder to predict than one with a formed plan.',stats:[['Tier','2 — Advanced'],['Mechanic','Seconds-ahead preview'],['Counter','Emotional disruption; unconscious attacks'],['Known Users','Katakuri, Luffy, Shanks']]},
+obs_range:{e:'🌐',t:'Island-Scale Observation',s:'Shanks and Enel tier',r:3,d:'Observation extended to cover an entire island or beyond passively. Shanks sensed Luffy\'s danger across vast distance and acted immediately. Enel monitored all of Skypiea simultaneously without active focus. No concentration required to maintain at this tier.',stats:[['Tier','3 — Supreme'],['Range','Island-scale or greater'],['Notable','Shanks — cross-sea sensing'],['Passive','No active focus required']]},
+con_basic:{e:'👑',t:'Conqueror\'s Burst',s:'Passive willpower emission',r:2,d:'A burst of willpower radiating outward — knocking out or terrifying those with weaker resolve. Cannot be trained into existence. Born with it or not. Most users first activate through extreme emotional distress. Animals submit or flee. Weaker humans fall unconscious.',stats:[['Rarity','~1 in 1,000,000'],['Trigger','Extreme emotion or intentional release'],['Effect','Knockouts, intimidation, animal submission'],['Trainable','No']]},
+con_coat:{e:'⚡',t:'Conqueror Coating',s:'Black lightning — advanced Haoshoku',r:0.5,d:'Conqueror\'s Haki woven into attacks and defenses. Black lightning discharge on impact. Damage output far exceeds standard Armament. Requires Haoshoku birthright and a sufficient power threshold — Kaido stated only a handful achieve this per era.',stats:[['Access','Born Haoshoku + power threshold required'],['Output','Highest offensive amplification available'],['Visual','Black lightning on contact'],['Known Users','Kaido, Luffy, Shanks, Big Mom, Roger']]},
+b1:{e:'🪙',t:'No Bounty / Unknown',s:'0 — 9,999,999 Berries',r:0,d:'No meaningful threat to the World Government. Brand new, operates in obscurity, or crimes too small in scale. Some underground operators deliberately suppress their bounty to stay off government radar. East Blue rookies typically sit here.',stats:[['Threat Level','Negligible'],['Marine Response','Local patrol — no priority'],['Examples','Pre-Arlong Luffy, civilian-level actors'],['Suppression','Some deliberately avoid escalation']]},
+b2:{e:'💵',t:'Notable Pirate',s:'10M — 99,999,999 Berries',r:0,d:'Has done something genuinely threatening to WG order. Arlong sat at 20M. Pre-timeskip Luffy reached 30M after Alabasta. Marine response shifts to bounty hunters and small squads at this range.',stats:[['Threat Level','Low-Medium'],['Marine Response','Bounty hunters; small Marine squads'],['Examples','Arlong (20M), Luffy pre-Enies (30M)'],['Milestone','Surviving Grand Line entry typically triggers this']]},
+b3:{e:'💎',t:'Supernova-Class',s:'100M — 999,999,999 Berries',r:0,d:'The Worst Generation all landed here. A genuine threat to regional stability. Vice Admirals become involved. Hitting 300M+ puts you on Shichibukai consideration lists.',stats:[['Threat Level','High'],['Marine Response','Vice Admiral deployment'],['Examples','Worst Generation — Luffy 300M, Law 500M'],['Significance','Acknowledged New World contender']]},
+b4:{e:'🏆',t:'Emperor-Class',s:'1B — 3,999,999,999 Berries',r:0,d:'Full Yonko-tier recognition. Treated as a destabilizing force equivalent to a small nation. Admirals may be dispatched. Presence reshapes the political landscape of the surrounding sea.',stats:[['Threat Level','Extreme'],['Marine Response','Admiral deployment or full fleet'],['Examples','Luffy 3B post-Wano, Law 3B'],['Effect','Yonko-equivalent political weight']]},
+b5:{e:'☠️',t:'World Threat',s:'4B+ Berries',r:0,d:'Existential threat designation. Roger was 5.5B. Whitebeard held an equivalent status. At this level, the Marines deploy everything — and often still lose. Gear Fifth revelation likely pushes Luffy toward this ceiling.',stats:[['Threat Level','Existential'],['Examples','Roger 5.5B, Whitebeard (informal equivalent)'],['WG Response','Full military — no ceiling on deployment'],['Implication','Capability to topple the current world order']]},
+crew_roles:{e:'🏴‍☠️',t:'Crew Roles',s:'Internal structure and responsibilities',r:0,d:'Standard roles: Captain (leader, highest bounty liability), First Mate (second in command — often comparable in raw strength), Officers (division leaders), Specialists (navigator, doctor, cook, shipwright — non-negotiable for survival), and general crew. Role defines responsibilities and how factions treat individual members.',stats:[['Captain','Strategic lead; highest bounty'],['First Mate','Combat pillar; often rivals captains of other crews'],['Specialists','Navigator, Doctor, Cook, Shipwright — survival-critical'],['General','Numbers provide leverage in logistics and territory']]},
+crew_tiers:{e:'📊',t:'Crew Tiers',s:'Rookie → Yonko Fleet',r:0,d:'Tiers by reach, influence, and combat ceiling: Rookie (East Blue/Paradise), Rising Crew (New World entry), Named Crew (bounty 100M+ average), Emperor Affiliate (under a Yonko), Yonko Crew (commands territory), Yonko Fleet (multi-crew sovereign alliance).',stats:[['Tier 1','Rookie — East Blue/early Paradise'],['Tier 3','Named Crew — New World recognized'],['Tier 5','Yonko Crew — commands sea territory'],['Tier 6','Yonko Fleet — sovereign-scale alliance']]},
+crew_alliance:{e:'🤝',t:'Alliance System',s:'Cross-crew cooperation and risk',r:0,d:'Alliances are legally non-binding and historically unstable. The Straw Hat–Law alliance is the most studied modern example. They pool combat resources and territory but risk betrayal and combined bounty escalation. An alliance between two Supernova crews immediately drew Yonko-level responses.',stats:[['Risk','Betrayal common; goals often diverge'],['Benefit','Combined combat power and territory control'],['Example','Straw Hat + Heart Pirates'],['Consequence','Shared enemies — combined Marine attention immediately']]},
+mar_ranks:{e:'⚓',t:'Marine Ranks',s:'Seaman → Fleet Admiral',r:0,d:'Ascending: Seaman Recruit → Seaman → Petty Officer → Sergeant → Ensign → Lt. JG → Lieutenant → Lt. Commander → Commander → Captain → Commodore → Rear Admiral → Vice Admiral → Admiral → Fleet Admiral. Most encounters involve Captains and below. Vice Admirals are elite deployments. Admirals are near-unbeatable by most standards.',stats:[['Entry','Seaman Recruit'],['Mid','Captain — commands ship and division'],['Elite','Vice Admiral — serious threat deployment'],['Apex','Fleet Admiral — one at a time; Akainu currently']]},
+mar_hq:{e:'🏛️',t:'Marine HQ Structure',s:'Command and deployment framework',r:0,d:'Fleet Admiral commands all. Three Admirals serve directly under (Kizaru, Fujitora, Ryokugyu post-timeskip). ~15 Vice Admirals at HQ. Thousands of Captains globally. Buster Call: 10 warships + 5 Vice Admirals — the nuclear option short of Admiral deployment.',stats:[['Admirals','3 active — direct WG enforcement arm'],['Buster Call','10 warships + 5 Vice Admirals minimum'],['Scope','Global reach; branches on every major island'],['Black Ops','CP9, CP0 — deniable operations']]},
+mar_justice:{e:'⚖️',t:'Absolute vs Moral Justice',s:'The philosophical fracture within the Marines',r:0,d:'Absolute Justice: law is correct by definition; any means to enforce it is justified — Akainu\'s position. Moral Justice: results matter but so does the method; some orders must be refused — Aokiji, Smoker. This divide produced the Marineford crisis internally and explains why capable Marines defect or resign rather than execute certain orders.',stats:[['Absolute','Akainu — burn everything threatening order'],['Moral','Aokiji / Smoker — question the order itself'],['Result','Marineford: Akainu vs Aokiji for Fleet Admiral'],['Defection','Kuzan left; Coby openly questions']]},
+drop_common:{e:'🗡️',t:'Common Blade — No Grade',s:'Standard unnamed weapons',r:40,d:'Ungraded swords with no special properties. Functional early but will not hold Haki effectively at higher levels and will break under significant force from higher-grade opponents. Dropped by grunt-level enemies and available in most port towns.',stats:[['Grade','None'],['Haki Retention','Poor'],['Durability','Low — breaks against high-grade opponents'],['Source','Common enemies, shops']]},
+drop_waza:{e:'⚔️',t:'Wazamono — Grade Sword',s:'50 total in the world',r:20,d:'Recognized skilled-grade blades. Hold Haki reliably. Will not break against most opponents. 50 exist globally, each named. Sandai Kitetsu is the most famous among them — also cursed. Reliable mid-tier weapon for any serious fighter.',stats:[['Grade','Wazamono (3rd tier)'],['Count','50 worldwide'],['Haki Retention','Good'],['Notable','Sandai Kitetsu (cursed)']]},
+drop_owaza:{e:'🌟',t:'O Wazamono — Great Grade',s:'21 total in the world',r:10,d:'Second-highest tier. 21 exist. Wado Ichimonji, Enma, and Ame no Habakiri sit here. Enma actively drinks Haki from its user — taming it proves elite mastery. These blades can channel Conqueror Haki and withstand pressure that shatters lesser swords.',stats:[['Grade','O Wazamono (2nd tier)'],['Count','21 worldwide'],['Notable','Enma, Wado Ichimonji, Ame no Habakiri'],['Enma Special','Actively drains wielder Haki']]},
+drop_saijo:{e:'🌙',t:'Saijo O Wazamono — Supreme Grade',s:'12 total in the world',r:3,d:'Absolute pinnacle of crafted swords. 12 exist. Yoru (Mihawk\'s black blade) is the most famous. Resist breaking under virtually any force when properly wielded. No defined upper limit — scales directly with the user\'s Haki output.',stats:[['Grade','Saijo O Wazamono (Supreme)'],['Count','12 worldwide'],['Notable','Yoru (Mihawk)'],['Ceiling','Undefined — scales with mastery']]},
+drop_cursed:{e:'🩸',t:'Cursed Blade — Kitetsu Lineage',s:'3 exist — each killed all prior owners',r:7,d:'Three Kitetsu blades each carry a death curse. Every prior owner died to it. Zoro accepted Sandai by testing fate — arm was spared. The curse manifests over time and in moments of bad luck. Power is real; the doom is real.',stats:[['Count','3 (Sandai, Nidai, original Kitetsu)'],['Curse','Death of all prior wielders — verified'],['Zoro','Threw it in the air — arm unharmed'],['Grade','Wazamono to O Wazamono range']]},
+drop_black:{e:'⬛',t:'Black Blade',s:'Permanently Haki-coated — 2 confirmed',r:1,d:'Not forged — created through sustained Haki coating so intense it permanently bonds to the blade. Only two confirmed: Yoru and Mihawk\'s small knife. Mihawk believes Zoro can produce a third. The process takes extreme mastery and likely years of consistent pressure.',stats:[['Confirmed','Yoru + Mihawk\'s knife'],['Creation','Sustained extreme Haki coating over time'],['Property','Permanent — does not wear off'],['Next','Mihawk believes Zoro will produce one']]},
+t_will:{e:'🔥',t:'Unbreakable Will',s:'Uncommon Trait',r:15,d:'Below a certain HP threshold, knockout effects fail — once per encounter. Conqueror Haki knockouts require a stronger burst to affect this user. Born from characters who have survived something that should have killed them.',stats:[['Type','Passive'],['Effect','Refuse KO once per encounter below threshold'],['Haki Resistance','Conqueror burst requires stronger emission to land'],['Source','Roll at creation or post-critical-survival event']]},
+t_haki:{e:'⚡',t:'Haki Prodigy',s:'Rare Trait',r:10,d:'Haki training milestones reached in half the normal time. Awakening thresholds (Future Sight, Ryou, Advanced Armament) unlock a tier earlier than standard. Represents rare natural spiritual affinity. Does not grant Conqueror if not born with it.',stats:[['Type','Passive'],['Effect','Haki stages unlock faster'],['Limitation','Does not grant Conqueror\'s Haki'],['Synergy','Stacks with intensive training arcs']]},
+t_conq:{e:'👑',t:'Conqueror\'s Blood',s:'Legendary Trait',r:2,d:'Born with dormant Haoshoku. Cannot be activated until a personal milestone (near-death, protecting someone, breaking a mental chain). Once triggered, full Conqueror tree is accessible. Not guaranteed to unlock — the milestone must be genuinely reached.',stats:[['Type','Dormant → Active'],['Unlock','Personal milestone required'],['Access','Full Conqueror tree on unlock'],['Rarity','Cannot be rolled twice on one character']]},
+t_mar:{e:'⚓',t:'Marine Lineage',s:'Uncommon Trait',r:8,d:'Family served the Marines. Starts with Soru and Tekkai partially trained. Marine NPCs have starting positive reputation. Certain pirate factions distrust the character from the start. Can be suppressed or embraced narratively.',stats:[['Type','Background + Passive'],['Starting Bonus','Partial Rokushiki: Soru + Tekkai'],['Faction','Marines +favor; some pirates -trust'],['Narrative','Tension if you become a pirate']]},
+t_curse:{e:'💀',t:'Cursed Fate',s:'Rare Trait',r:5,d:'Fate pulls toward extremes. Roll ceilings for rare loot and ability unlocks are higher — but injury severity and setback chance also increase. Luck stat penalized. Characters attract disaster and destiny in equal measure. The Kitetsu curse is the mechanical precedent.',stats:[['Type','Passive (double-edged)'],['Positive','Higher ceiling on rare rolls'],['Negative','Injury/setback probability up; luck penalty'],['Lore','Associated with Kitetsu bloodlines and D. carriers']]},
+t_fruit:{e:'🍎',t:'Devil\'s Affinity',s:'Rare Trait',r:7,d:'Natural compatibility with Devil Fruit energy. Mastery stages progress one tier faster. Awakening threshold lowered by one major milestone. Does not grant a fruit — only accelerates mastery of one already consumed.',stats:[['Type','Passive'],['Effect','Fruit stages faster; awakening threshold -1 milestone'],['Limitation','Does not grant a fruit'],['Synergy','Best with Mythic or Legendary fruits']]},
+t_giant:{e:'🗿',t:'Giant Blood',s:'Rare Trait',r:3,d:'Partial giant heritage. Base HP significantly increased. Strength stats start higher. Agility and speed reduced. Weapons scale up in impact. Harder to maneuver in confined spaces.',stats:[['Type','Passive'],['HP','Significantly above baseline'],['Strength','Higher starting value'],['Penalty','Reduced agility; confined space disadvantage']]},
+t_shadow:{e:'🌑',t:'Shadow Walker',s:'Rare Trait',r:6,d:'Naturally difficult to detect by Observation Haki — the user\'s presence emits weakly. Ambush bonus. Basic Observation has detection range halved against this character. Advanced Observation is not affected.',stats:[['Type','Passive'],['Stealth','Reduced Observation detection footprint'],['Ambush','Bonus damage/initiative on surprise'],['Counter','Advanced/Supreme Observation sees through it']]},
+t_sea:{e:'🌊',t:'Child of the Sea',s:'Rare Trait',r:4,d:'Born with deep sea affinity. No movement penalty in water (unless a Devil Fruit is consumed, which adds its own weakness). Fish-Man Karate available as starting option. Ocean combat bonus.',stats:[['Type','Passive'],['Water','No natural movement penalty'],['Combat','Bonus in ocean/water environments'],['Synergy','Fish-Man Karate available at creation']]},
+t_beast:{e:'🐉',t:'Beast Instinct',s:'Rare Trait',r:5,d:'Zoan fruits grant amplified stat bonuses in hybrid and full-beast forms. Hybrid form maintained longer without stamina drain. Full-beast transition faster. No effect without a Zoan fruit.',stats:[['Type','Passive (Zoan-dependent)'],['Hybrid','Higher stat bonus; less stamina drain'],['Full Beast','Faster transition'],['Limitation','Inert without a Zoan']]},
+t_iron:{e:'🛡️',t:'Iron Body',s:'Uncommon Trait',r:12,d:'Natural physical resistance to blunt and slashing damage. Not Haki — purely physical toughness. Flat damage reduction on physical strikes. Tekkai from Rokushiki builds on this naturally. Ryou (internal Armament) bypasses it entirely.',stats:[['Type','Passive'],['Effect','Flat damage reduction on physical strikes'],['Synergy','Stacks with Tekkai and basic Armament'],['Limitation','Ryou bypasses — internal attacks unaffected']]},
+t_d:{e:'😁',t:'Will of D.',s:'Mythic Trait — assigned, not rolled',r:1,d:'The D. initial carries something the World Government has feared for centuries. Mechanics: cannot be fully broken by willpower suppression; Conqueror knockouts require double the threshold; once per story arc, a near-death second chance triggers. Enemies tied to World Government authority take increased pressure from this character\'s presence. The WG targets confirmed D. carriers for elimination.',stats:[['Assignment','Narrative — cannot be rolled normally'],['WG Response','Immediate elimination priority if confirmed'],['Near-Death','One arc-wide second chance'],['Lore','Roger, Garp, Ace, Luffy, Teach, Law — all carry it']]},
+r_human:{e:'🧑',t:'Human',s:'Most numerous — no restrictions',r:35,d:'No innate abilities and no innate restrictions. Access to all fruit types, all Haki types, all martial schools. The most flexible race. High-end human characters (Mihawk, Garp, Roger) demonstrate the ceiling is unlimited — they simply have to work harder to get there.',stats:[['Innate Ability','None'],['Haki Access','All three types available'],['Fruit Access','All types'],['Ceiling','Unlimited — defined entirely by effort']]},
+r_fish:{e:'🐟',t:'Fish-Man / Merman',s:'10x human base strength',r:12,d:'Biologically superior in raw strength — 10x baseline. Cannot eat Devil Fruits without losing the ability to breathe underwater, their primary environmental advantage. Fish-Man Karate is culturally native. Societal prejudice from humans is a narrative weight on this race.',stats:[['Strength','10x human baseline'],['Devil Fruit','Can eat — loses underwater breathing'],['Native Style','Fish-Man Karate'],['Weakness','Prejudice narrative; surface dehydration in extreme heat']]},
+r_mink:{e:'🐺',t:'Mink',s:'Electro and Sulong',r:10,d:'All Minks produce Electro — bio-electric current discharged through touch or fur. At the full moon, sufficient willpower activates Sulong — primal transformation amplifying all stats at the cost of rapid lifespan consumption. Sulong without control burns the user out.',stats:[['Passive','Electro — bio-electric discharge'],['Transformation','Sulong — full moon + willpower'],['Cost','Sulong consumes lifespan if sustained'],['Native Home','Zou — Sky Island']]},
+r_giant:{e:'🗿',t:'Giant',s:'Scale and raw power',r:8,d:'True Giants stand dozens of meters tall. Proportional strength and HP are enormous. Speed and agility suffer at scale. Devil Fruits can be eaten but effects are smaller relative to body mass. Haki ceilings are high.',stats:[['Scale','Dozens of meters tall'],['Strength','Proportionally massive'],['Agility','Reduced'],['Endurance','Extraordinary — Dorry and Brogy fought for a century']]},
+r_ancgiant:{e:'🏔️',t:'Ancient Giant',s:'New Race — Elbaph bloodline',r:3,d:'Descendants of the oldest Giant lineage. Scale exceeds modern Giants. Elbaph\'s Viking warrior tradition runs through the bloodline. Access to ancient fighting techniques unavailable to regular Giants. Bodies respond more powerfully to Haki development than standard Giants.',stats:[['Scale','Exceeds modern Giants'],['Lineage','Elbaph — oldest Giant civilization'],['Haki Growth','Superior rate vs standard Giants'],['Combat Style','Ancient Elbaph warrior tradition']]},
+r_oni:{e:'👹',t:'Oni',s:'New Race — Wano supernatural bloodline',r:4,d:'Supernatural humanoids from Wano with mythological roots. Stronger than humans, with natural resistance to extreme physical trauma. Bodies handle brief water contact better than humans naturally (no Devil Fruit weakness, just physical resilience). Kaido is implied to have Oni blood. Enhanced durability and dark power aesthetic.',stats:[['Origin','Wano — mythological lineage'],['Strength','Significantly above human baseline'],['Durability','Natural physical trauma resistance'],['Haki','Responds powerfully to Conqueror development']]},
+r_primalmink:{e:'🌕',t:'Primal Mink',s:'New Race — Permanent Sulong access',r:2,d:'A rare throwback to the ancestral Mink state. Can enter Sulong without a full moon. Cannot fully suppress it — in high-stress combat it activates involuntarily. Electro is significantly more powerful than standard Minks and can be discharged at range.',stats:[['Sulong','Accessible without full moon'],['Risk','Involuntary activation under extreme stress'],['Electro','Enhanced — ranged discharge capable'],['Rarity','Almost extinct — few families remain']]},
+r_uranus:{e:'🌌',t:'Uranus Descendant',s:'New Race — Ancient Weapon bloodline',r:0.5,d:'Blood tied to Ancient Weapon Uranus — one of three weapons capable of destroying the world. Mechanically: supernatural destructive potential when Haki or abilities are pushed past normal thresholds. The World Government immediately targets any confirmed Uranus descendant for elimination. Power ceiling is undefined and likely beyond current measurement.',stats:[['Origin','Ancient Weapon Uranus lineage'],['Power','Undefined ceiling — exceeds standard measurement'],['WG Response','Immediate termination priority on confirmation'],['Activation','Thresholds — spikes past normal limits']]},
+bk_pirate:{e:'🏴‍☠️',t:'Pirate Heritage',s:'Common Origin',r:25,d:'Raised on a pirate ship or in a pirate family. Combat exposure from youth gives early access to one weapon skill and a ship navigation bonus. Positive reputation with pirate crews; negative with Marines. Most common starting point — broad flexibility.',stats:[['Starting Bonus','One weapon skill + basic navigation'],['Faction','Pirate-aligned'],['Marine Relation','-1 reputation tier at start'],['Trait Pool','Standard — all traits available']]},
+bk_marine:{e:'⚓',t:'Marine Family',s:'Common Origin',r:20,d:'Military upbringing under WG doctrine. Partial Rokushiki access (Soru and Tekkai at beginner level). Starts Marine-aligned. If you become a pirate, the bridge must be actively burned — it does not happen automatically.',stats:[['Starting Bonus','Soru (basic) + Tekkai (basic)'],['Faction','Marine-aligned at start'],['Conflict','Pirate path requires active narrative break'],['Trait Pool','Iron Body and Marine Lineage favored']]},
+bk_noble:{e:'🏰',t:'Noble Blood',s:'Uncommon Origin',r:10,d:'Born into royalty or Celestial Dragon proximity. Political connections and financial resources above baseline. Access to private tutors: one advanced technique at creation cost — arrogance narrative flags affect how NPCs respond. Conqueror\'s Blood has higher roll probability here.',stats:[['Starting Bonus','Financial resources + political connection'],['Skill Access','One advanced technique via private tutor'],['Social Cost','Arrogance flags — some NPCs hostile by default'],['Trait Pool','Conqueror\'s Blood probability increased']]},
+bk_slave:{e:'⛓️',t:'Escaped Slave',s:'Uncommon Origin',r:10,d:'Survived Celestial Dragon enslavement. Highest starting willpower rating. Permanent hatred modifier against WG-affiliated NPCs. Physical conditioning from labor gives above-baseline strength and pain tolerance. Triggers automatic Celestial Dragon enemy status.',stats:[['Starting Bonus','Highest willpower rating; pain tolerance'],['Strength','Above baseline from labor conditioning'],['Enemy','Celestial Dragons + WG — permanent hostile'],['Trait Pool','Unbreakable Will and Cursed Fate favored']]},
+bk_rev:{e:'✊',t:'Revolutionary',s:'Uncommon Origin',r:8,d:'Trained under Dragon\'s Revolutionary Army. Structured combat training and ideological grounding. Above-average early Haki development. Marine reputation minimum hostile at start. Revolutionary connections offer intelligence network access unavailable to other origins.',stats:[['Starting Bonus','Structured combat training'],['Haki','Faster early development'],['Faction','Marine-hostile from start'],['Network','Revolutionary intel access']]},
+bk_void:{e:'❓',t:'Unknown Origin — Void',s:'Legendary Origin',r:3,d:'No records. No traceable past. Widest trait variance — best and worst outcomes both more likely. Faction reputation starts neutral everywhere (unique). No starting bonuses of any kind. Maximum potential, zero safety net.',stats:[['Starting Bonus','None — absolute zero'],['Trait Roll','Highest variance — peaks and floors more likely'],['Faction','Neutral everywhere at start (unique)'],['Narrative','Your past is unknown to everyone including you']]}
 };
 
-// ========================================
-// FUNCTIONS
-// ========================================
-
-function sw(id, el) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
-    document.getElementById('section-' + id).classList.add('active');
-    el.classList.add('active');
+function sw(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  el.classList.add('active');
 }
 
-/**
- * Open modal with item details and expandable sections
- */
-function om(id) {
-    const d = D[id];
-    if (!d) return;
-
-    // Set header
-    document.getElementById('me').textContent = d.e;
-    document.getElementById('mt').textContent = d.t;
-    document.getElementById('msu').textContent = d.s;
-
-    // Set image
-    const imgElement = document.getElementById('mi');
-    if (d.img) {
-        imgElement.src = d.img;
-        imgElement.classList.add('show');
-    } else {
-        imgElement.classList.remove('show');
-    }
-
-    // Build detail tabs
-    const tabsContainer = document.getElementById('dt');
-    tabsContainer.innerHTML = '';
-    
-    if (d.details && d.details.length > 0) {
-        d.details.forEach((detail, idx) => {
-            const tab = document.createElement('div');
-            tab.className = `detail-tab ${idx === 0 ? 'active' : ''}`;
-            tab.textContent = `${detail.icon} ${detail.name}`;
-            tab.onclick = () => switchTab(idx, id);
-            tabsContainer.appendChild(tab);
-        });
-    }
-
-    // Build detail content sections
-    let contentHTML = '';
-    if (d.details && d.details.length > 0) {
-        d.details.forEach((detail, idx) => {
-            contentHTML += `
-                <div class="detail-content ${idx === 0 ? 'show' : ''}" id="content-${idx}">
-                    ${detail.content}
-                </div>
-            `;
-        });
-    }
-
-    // Build stats
-    const stats = d.stats ? d.stats.map(([l, v]) => 
-        `<div class="sr"><span class="sl">${l}</span><span class="sv">${v}</span></div>`
-    ).join('') : '';
-
-    // Build roll chance
-    let roll = '';
-    if (d.r && d.r > 0) {
-        const pct = Math.min(d.r, 50);
-        const fw = (pct / 50) * 100;
-        roll = `<div class="msec" style="margin-top:16px">
-            <div class="rc">
-                <div class="rh"><span class="rl">Roll Chance</span><span class="rp">${d.r}%</span></div>
-                <div class="rt"><div class="rf" style="width:${fw}%"></div></div>
-                <div class="rn">Scale: 1%–50% — higher means more commonly obtained</div>
-            </div>
-        </div>`;
-    }
-
-    // Populate modal
-    document.getElementById('mb').innerHTML = `
-        ${contentHTML}
-        <div class="msec" style="margin-top:16px"><div class="msec-t">Core Stats</div>${stats}</div>
-        ${roll}`;
-
-    // Show modal
-    document.getElementById('mo').classList.add('open');
+function om(id){
+  const d=D[id]; if(!d)return;
+  document.getElementById('me').textContent=d.e;
+  document.getElementById('mt').textContent=d.t;
+  document.getElementById('msu').textContent=d.s;
+  const stats=d.stats.map(([l,v])=>`<div class="sr"><span class="sl">${l}</span><span class="sv">${v}</span></div>`).join('');
+  let roll='';
+  if(d.r&&d.r>0){
+    const pct=Math.min(d.r,50);
+    const fw=(pct/50)*100;
+    roll=`<div class="msec" style="margin-top:16px">
+      <div class="rc">
+        <div class="rh"><span class="rl">Roll Chance</span><span class="rp">${d.r}%</span></div>
+        <div class="rt"><div class="rf" style="width:${fw}%"></div></div>
+        <div class="rn">Scale: 1%–50% — higher means more commonly obtained</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('mb').innerHTML=`
+    <div class="msec"><div class="msec-t">Overview</div><p>${d.d}</p></div>
+    <div class="msec" style="margin-top:16px"><div class="msec-t">Details</div>${stats}</div>
+    ${roll}`;
+  document.getElementById('mo').classList.add('open');
 }
 
-/**
- * Switch between detail tabs
- */
-function switchTab(tabIndex, itemId) {
-    // Hide all content
-    document.querySelectorAll('.detail-content').forEach(c => c.classList.remove('show'));
-    // Remove active from tabs
-    document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
-    
-    // Show selected content
-    const contentElement = document.getElementById(`content-${tabIndex}`);
-    if (contentElement) {
-        contentElement.classList.add('show');
-    }
-    
-    // Mark tab as active
-    document.querySelectorAll('.detail-tab')[tabIndex].classList.add('active');
-}
-
-function cm() {
-    document.getElementById('mo').classList.remove('open');
-}
-
-function cmob(e) {
-    if (e.target === document.getElementById('mo')) {
-        cm();
-    }
-}
-
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') cm();
-});
+function cm(){document.getElementById('mo').classList.remove('open');}
+function cmob(e){if(e.target===document.getElementById('mo'))cm();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cm();});
 </script>
-
 </body>
 </html>
